@@ -5,7 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Arbol\" />
+    <Compile Remove="Arbol\**" />
+    <Content Remove="Arbol\**" />
+    <EmbeddedResource Remove="Arbol\**" />
+    <None Remove="Arbol\**" />
   </ItemGroup>
 
   <ItemGroup>
