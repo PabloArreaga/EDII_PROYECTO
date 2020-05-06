@@ -110,11 +110,11 @@ namespace EDII_PROYECTO.ArbolB
                 if (LiberarHoja)
                 {
                     raiz.values.Add(Valores);
-                    raiz.values = Ordenar(raiz.values);
+                    raiz.values = raiz.values.OrderBy(x => x.Name).ToList();
                 }
                 if (validar == 1) // hijos de la raiz
                 {
-                    if (raiz.values[raiz.values.Count - 1].Nombre.CompareTo(Valores.Nombre) < 0) // -1 porque es menor a la raiz
+                    if (raiz.values[raiz.values.Count - 1].Name.CompareTo(Valores.Name) < 0) // -1 porque es menor a la raiz
                     {
                         if (raiz.hijos[num + 1].values.Count < grado - 1)
                         {
@@ -137,13 +137,13 @@ namespace EDII_PROYECTO.ArbolB
                                 int mitad = (raiz.hijos[num + 1].values.Count) / 2;
                                 var nuevo_elemento = Subir_Elemento(mitad, raiz.hijos[num + 1].values);
                                 raiz.values.Add(nuevo_elemento);
-                                raiz.hijos[num + 2] = new Nodo();
+                                raiz.hijos[num + 2] = new Node();
                                 raiz.hijos[num + 2].id = 4;
                                 raiz.hijos[num + 2].padre = raiz;
                                 var derecho = Der(mitad, raiz.hijos[num + 1].values);
-                                Ordenar(derecho);
+                                derecho.OrderBy(x => x.Name).ToList();
                                 var Izquierdo = Izq(mitad, raiz.hijos[num + 1].values);
-                                Ordenar(Izquierdo);
+                                Izquierdo.OrderBy(x => x.Name).ToList();
                                 raiz.hijos[num + 2].values = derecho;
                                 raiz.hijos[num + 1].values = Izquierdo;
                                 numero++;
