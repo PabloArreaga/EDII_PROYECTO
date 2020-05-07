@@ -3,11 +3,35 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EDII_PROYECTO.Helpers;
+using System.IO;
+
 
 namespace EDII_PROYECTO.ArbolB
 {
-    public class BTree
+    public class BTree<T> where T : IComparable
     {
+        public static void Create(string nameFile, Delegate gNode, Delegate gText)
+        {
+            var grade = 7;
+            Data.Instance.adress = $"Datos\\{nameFile}.txt";
+
+            if (!Directory.Exists("Datos"))
+            {
+                Directory.CreateDirectory("Datos");
+            }
+            if (!File.Exists(Data.Instance.adress))
+            {
+                string start = $"{grade.ToString("0000;-0000")}|0000|0001|";
+                File.WriteAllText(Data.Instance.adress, start);
+            }
+            Data.Instance.getNode = gNode;
+            Data.Instance.getText = gText;
+        }
+
+
+
+
         #region Nodo
         private static BTree _instance = null;
         public static BTree Instance

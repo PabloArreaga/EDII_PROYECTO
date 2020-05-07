@@ -17,10 +17,41 @@ namespace EDII_PROYECTO.Models
 		{
 			return this.Id.CompareTo(((Product)obj).Id);
 		}
-	
-	
-	
-	
-	}
+
+        public static string ConvertToString(object dataNode)
+        {
+            var auxNode = (Product)dataNode;
+            
+            if (auxNode.Name == null)
+            {
+                auxNode.Name = "";
+            }
+            else
+            {
+                auxNode.Name = auxNode.Name;
+            }
+            if (auxNode.Description == null)
+            {
+                auxNode.Description = "";
+            }
+            else
+            {
+                auxNode.Description = auxNode.Description;
+            }
+            return $"{string.Format("{0,-100}", auxNode.Id.ToString())}{string.Format("{0,-100}", auxNode.Name)}{string.Format("{0,-100}", auxNode.Description)}{string.Format("{0,-100}", auxNode.Price.ToString())}";
+        }
+
+        public static Product ConvertToProducto(string dataNode)
+        {
+            var separateInformation = new List<string>();
+            for (int i = 0; i < 4; i++)
+            {
+                separateInformation.Add(dataNode.Substring(0, 100));
+                dataNode = dataNode.Substring(100);
+            }
+            return new Product() { Id = Convert.ToInt32(separateInformation[0]), Name = separateInformation[1].Trim(), Description = separateInformation[2].Trim(), Price = Convert.ToDouble(separateInformation[3])};
+        }
+
+    }
 
 }
