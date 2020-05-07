@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EDII_PROYECTO.Models
 {
-	public class Product
+	public class Product : IComparable
 	{
 		public int Id { get; set; }
 		public string Name { get; set; }

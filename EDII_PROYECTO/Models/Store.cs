@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace EDII_PROYECTO.Models
 {
-	public class Store
+	public class Store : IComparable
 	{
 		public int Id { get; set; }
 		public string Name { get; set; }
