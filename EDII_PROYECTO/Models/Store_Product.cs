@@ -11,5 +11,17 @@ namespace EDII_PROYECTO.Models
 		int IdProduct { get; set; }
 		int Stock { get; set; }
 
+		public int CompareTo(object obj)
+		{
+			if (this.IdStore.Equals(((Store_Product)obj).IdStore))
+			{
+				return this.IdProduct.CompareTo(((Store_Product)obj).IdProduct);
+			}
+			else
+			{
+				return 0; // no encontro coincidencia con la tienda
+			}
+			
+		}
 	}
 }

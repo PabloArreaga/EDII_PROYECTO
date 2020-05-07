@@ -12,5 +12,15 @@ namespace EDII_PROYECTO.Models
 		public string Name { get; set; }
 		public string Description { get; set; }
 		public double Price { get; set; }
+	
+		public int CompareTo(object obj)
+		{
+			return this.Id.CompareTo(((Product)obj).Id);
+		}
+	
+	
+	
+	
 	}
+
 }

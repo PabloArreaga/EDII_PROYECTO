@@ -11,5 +11,10 @@ namespace EDII_PROYECTO.Models
 		public string Name { get; set; }
 		public string  Address { get; set; }
 
+		public int CompareTo(object obj)
+		{
+			return this.Id.CompareTo(((Store)obj).Id);
+		}
+
 	}
 }
