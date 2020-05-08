@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EDII_PROYECTO.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace EDII_PROYECTO.Helpers
                 return _instance;
             }
         }
-
+        public List<tipo> DatosGenerados = new List<tipo>();//Lista clase
         public int grade;
         public Delegate getNode;
         public Delegate getText;

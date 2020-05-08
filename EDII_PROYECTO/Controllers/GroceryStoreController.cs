@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using EDII_PROYECTO.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using static EDII_PROYECTO.Encrip.InfoSDES;
+using static EDII_PROYECTO.Encrip.EncriptarSDES;
 
 namespace EDII_PROYECTO.Controllers
 {
