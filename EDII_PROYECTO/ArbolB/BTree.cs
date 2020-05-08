@@ -14,12 +14,10 @@ namespace EDII_PROYECTO.ArbolB
         public static void Create(string nameFile, Delegate gNode, Delegate gText)
         {
             var grade = 7;
-            var adress = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + "\\Producto";
-            Data.Instance.adress = adress + $"\\{nameFile}.txt";
-
-            if (!Directory.Exists(adress))
+            Data.Instance.adress = $"Database\\{nameFile}.txt";
+            if (!Directory.Exists("Database"))
             {
-                Directory.CreateDirectory(adress);
+                Directory.CreateDirectory("Database");
             }
             if (!File.Exists(Data.Instance.adress))
             {
