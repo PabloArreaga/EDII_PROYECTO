@@ -102,14 +102,43 @@ namespace EDII_PROYECTO.Controllers
                         nombre = nombre.Replace("IMPORTADO_", string.Empty);
                         using (StreamReader newfile = new StreamReader("TusArchivos/" + nombre + ".txt"))
                         {
-                            var texto = string.Empty;
+                            string texto = string.Empty;
                             var linea = string.Empty;
+                            var listaNodo = new List<AllData>();
                             while ((linea = newfile.ReadLine()) != null)
                             {
-                                texto += linea.Trim();
-
+                                if (linea.Contains(":"))
+                                {
+                                    var toAdd = linea.Split(':');
+                                    toAdd[1] = toAdd[1].Trim(',');
+                                    listaNodo.Add(new AllData(toAdd[0].Trim(), toAdd[1].Trim()));
+                                }
                             }
-                            JObject convertJSON = JObject.Parse(texto);
+                            var id = string.Empty;
+                            var name = string.Empty;
+                            var price = string.Empty;
+                            foreach (var item in listaNodo)
+                            {
+                                var type = item.TypeData.Trim('"');
+                                if (type == "_id")
+                                {
+                                    id = item.StringData;
+                                }
+                                else if (type == "_name")
+                                {
+                                    name = item.StringData;
+                                }
+                                else if (type == "_price")
+                                {
+                                    price = item.StringData;
+                                }                            }
+                            var nodoInterno = new Comp_Product
+                            {
+                                _id = Int32.Parse(id),
+                                _name = name,
+                                _price = Int32.Parse(price)
+                            };
+                            postProduct(nodoInterno);
                         }
                     }
                 }
@@ -120,6 +149,16 @@ namespace EDII_PROYECTO.Controllers
             {
                 return NotFound(new string[] { "Porfavor seleccione un archivo" });
             }
+        }
+        public struct AllData
+        {
+            public AllData(string strdata, string strValue)
+            {
+                TypeData = strdata;
+                StringData = strValue;
+            }
+            public string TypeData { get; private set; }
+            public string StringData { get; private set; }
         }
     }
 }
