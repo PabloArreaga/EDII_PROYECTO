@@ -29,9 +29,6 @@ namespace EDII_PROYECTO.ArbolB
             Data.Instance.getText = gText;
         }
 
-
-
-
         #region Nodo
         private static BTree _instance = null;
         public static BTree Instance
