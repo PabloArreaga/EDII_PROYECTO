@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using EDII_PROYECTO.Helpers;
 using System.IO;
-
+using System.Text;
 
 namespace EDII_PROYECTO.ArbolB
 {
@@ -29,159 +29,388 @@ namespace EDII_PROYECTO.ArbolB
             Data.Instance.getText = gText;
         }
 
-        #region Nodo
-        private static BTree _instance = null;
-        public static BTree Instance
+        static int[] Header(int[] header = null)
         {
-            get
+            var buffer = new byte[14];
+            using (var fileS = new FileStream(Data.Instance.adress, FileMode.OpenOrCreate))
             {
-                if (_instance == null) _instance = new BTree();
-                return _instance;
-            }
-        }
-        public static int grado = 7;
-        public Node raiz = null;
-        public int numero = 0;
-        public int ID = 1;
-        public int Proxima { get; set; }
-        static int valor_raiz = ((4 * (grado - 1)) / 3);
-        public bool LiberarHoja = true;
-        public int validar = 0;
+                if (header == null)
+                {
+                    fileS.Read(buffer, 0, 14);
+                    var values = Encoding.UTF8.GetString(buffer).Split('|');
 
-        #endregion
+                    return new int[3] { Convert.ToInt32(values[0]), Convert.ToInt32(values[1]), Convert.ToInt32(values[2]) };
+                }
 
-        #region Arbol
-        public Product Subir_Elemento(int mitad, List<Product> nodo)
-        {
-            int num = 0;
-            var nuevo_elemento = new Product();
-            foreach (var item in nodo)
-            {
-                if (num == mitad)
+                var line = string.Empty;
+                foreach (var item in header)
                 {
-                    nuevo_elemento = item;
-                    break;
+                    line = $"{line}{item.ToString("0000;-0000")}|";
                 }
-                num++;
+                fileS.Write(Encoding.UTF8.GetBytes(line.ToCharArray()), 0, 15);
             }
-            return nuevo_elemento;
+            return null;
         }
-        public List<Product> Der(int mitad, List<Product> nodo)
+
+        public static void ValidateIncert(T data)
         {
-            int num = nodo.Count;
-            var nuevo_elemento = new List<Product>();
-            foreach (var item in nodo)
+            /*METADATA
+             * [0] = grade
+             * [1] = root
+             * [2] = Posicion siguiente
+            */
+            var auxHeader = Header();
+            Data.Instance.grade = auxHeader[0];
+
+            if (auxHeader[1] == 0)
             {
-                if (num < mitad + 1)
-                {
-                    nuevo_elemento.Add(item);
-                }
-                num--;
-            }
-            return nuevo_elemento;
-        }
-        public List<Product> Izq(int mitad, List<Product> nodo)
-        {
-            int num = 0;
-            var nuevo_elemento = new List<Product>();
-            foreach (var item in nodo)
-            {
-                if (num < mitad)
-                {
-                    nuevo_elemento.Add(item);
-                }
-                num++;
-            }
-            return nuevo_elemento;
-        }
-        public void Primeradivision(Node PrimerNodo, int num, Product elementoRaiz)
-        {
-            int mitad = PrimerNodo.values.Count / 2;
-            PrimerNodo.hijos[num] = new Node();
-            var Izquierdo = Izq(mitad, PrimerNodo.values);
-            PrimerNodo.hijos[num].values = Izquierdo;
-            PrimerNodo.hijos[num].id = 2;
-            PrimerNodo.hijos[num].padre = PrimerNodo;
-            PrimerNodo.hijos[num + 1] = new Node();
-            PrimerNodo.hijos[num + 1].id = 3;
-            PrimerNodo.hijos[num + 1].padre = PrimerNodo;
-            var Derecho = Der(mitad, PrimerNodo.values);
-            PrimerNodo.hijos[num + 1].values = Derecho;
-            PrimerNodo.values.Clear();
-            PrimerNodo.values.Add(elementoRaiz);
-            LiberarHoja = false;
-        }
-        public void Insertar(int num, Product Valores)
-        {
-            if (raiz == null)
-            {
-                raiz = new Node();
-                raiz.values.Add(Valores);
-                raiz.id = ID;
+                auxHeader[1]++;
+                auxHeader[2]++;
+
+                var ausNode = new Node<T>(0) { index = 1, values = new List<T> { data }, children = new List<int>() };
+                ausNode.ConvertNodetoString();
+
+                Header(auxHeader);
             }
             else
             {
-                if (raiz.MaximoRaiz)//full
+                var move = false;
+                var moveSon = false;
+                var flagFirst = true;
+                var son = 0;
+                var positionSon = 0;
+                Insert(auxHeader[1], ref data, ref son, ref positionSon, ref move, ref moveSon, ref flagFirst);
+            }
+        }
+
+        static void Insert(int currentIndex, ref T data, ref int son, ref int positionSon, ref bool flagCarry, ref bool flagSon, ref bool flagFirst)
+        {
+            var header = Header();
+            var currentNode = Node<T>.ConvertToNodo(currentIndex);
+
+            var position = 0;
+            if (currentNode.children.Count == 0)
+            {
+                while (position < currentNode.values.Count && currentNode.values[position].CompareTo(data) == -1)
                 {
-                    int mitad = raiz.values.Count / 2;
-                    var NuevoElmento = Subir_Elemento(mitad, raiz.values);
-                    raiz.values.Add(Valores);
-                    Primeradivision(raiz, num, NuevoElmento);
+                    position++;
                 }
-                if (LiberarHoja)
+                currentNode.values.Insert(position, data);
+            }
+            else
+            {
+                while (position < currentNode.values.Count && currentNode.values[position].CompareTo(data) == -1)
                 {
-                    raiz.values.Add(Valores);
-                    raiz.values = raiz.values.OrderBy(x => x.Name).ToList();
+                    position++;
                 }
-                if (validar == 1) // hijos de la raiz
+                Insert(currentNode.children[position], ref data, ref son, ref positionSon, ref flagCarry, ref flagSon, ref flagFirst);
+            }
+
+            if (flagCarry)
+            {
+                position = 0;
+                currentNode = Node<T>.ConvertToNodo(currentNode.index);
+                while (position < currentNode.values.Count && currentNode.values[position].CompareTo(data) == -1)
                 {
-                    if (raiz.values[raiz.values.Count - 1].Name.CompareTo(Valores.Name) < 0) // -1 porque es menor a la raiz
+                    position++;
+                }
+                currentNode.values.Insert(position, data);
+                if (flagSon)
+                {
+                    currentNode.children.Insert(positionSon, son);
+                    flagSon = false;
+                }
+                flagCarry = false;
+            }
+
+            if (currentNode.values.Count == currentNode.numberValues + 1)
+            {
+                if (currentNode.children.Count == 0 && currentNode.father != 0)
+                {
+                    var father = Node<T>.ConvertToNodo(currentNode.father);
+                    var indexCurrent = father.children.IndexOf(currentNode.index);
+                    var indexBrother = Rotate(father, indexCurrent, header);
+                    //var dataIndex = indexCurrent == 0 ? 0 : indexCurrent - 1;
+                    T auxData = currentNode.values[0];
+                    var carry = false;
+
+                    if (indexBrother < indexCurrent)
                     {
-                        if (raiz.hijos[num + 1].values.Count < grado - 1)
+                        var dataIndex = indexCurrent == 0 ? 0 : indexCurrent - 1;
+                        for (int i = indexCurrent; i >= indexBrother; i--)
                         {
-                            raiz.hijos[num + 1].values.Add(Valores);
-                        }
-                        else
-                        {
-                            if (raiz.hijos[num].values.Count < grado - 1) /// && raiz.hijos[2] == null
+                            if (father.children[i] != currentNode.index)
                             {
-                                raiz.hijos[num + 1].values.Add(Valores);
-                                var salida = raiz.values[0];
-                                raiz.values.RemoveAt(num);
-                                raiz.hijos[num].values.Add(salida);
-                                raiz.values.Add(raiz.hijos[num + 1].values[0]);
-                                raiz.hijos[num + 1].values.RemoveAt(0);
+                                currentNode = Node<T>.ConvertToNodo(father.children[i]);
+                            }
+                            if (carry)
+                            {
+                                father.values.Insert(dataIndex, auxData);
+                                auxData = father.values[dataIndex + 1];
+                                father.values.RemoveAt(dataIndex + 1);
+                                father.ConvertNodetoString();
+                                currentNode.values.Add(auxData);
+                                auxData = currentNode.values[0];
+                                if (i != indexBrother)
+                                {
+                                    currentNode.values.RemoveAt(0);
+                                }
+                                dataIndex--;
                             }
                             else
                             {
-                                raiz.hijos[num + 1].values.Add(Valores);
-                                int mitad = (raiz.hijos[num + 1].values.Count) / 2;
-                                var nuevo_elemento = Subir_Elemento(mitad, raiz.hijos[num + 1].values);
-                                raiz.values.Add(nuevo_elemento);
-                                raiz.hijos[num + 2] = new Node();
-                                raiz.hijos[num + 2].id = 4;
-                                raiz.hijos[num + 2].padre = raiz;
-                                var derecho = Der(mitad, raiz.hijos[num + 1].values);
-                                derecho.OrderBy(x => x.Name).ToList();
-                                var Izquierdo = Izq(mitad, raiz.hijos[num + 1].values);
-                                Izquierdo.OrderBy(x => x.Name).ToList();
-                                raiz.hijos[num + 2].values = derecho;
-                                raiz.hijos[num + 1].values = Izquierdo;
-                                numero++;
+                                auxData = currentNode.values[0];
+                                currentNode.values.RemoveAt(0);
                             }
+
+                            currentNode.ConvertNodetoString();
+                            carry = true;
                         }
                     }
+                    else if (indexBrother > indexCurrent)
+                    {
+                        var indiceDato = indexCurrent == father.children.Count() - 1 ? indexCurrent - 1 : indexCurrent;
+                        for (int i = indexCurrent; i <= indexBrother; i++)
+                        {
+                            if (father.children[i] != currentNode.index)
+                            {
+                                currentNode = Node<T>.ConvertToNodo(father.children[i]);
+                            }
+                            if (carry)
+                            {
+                                father.values.Insert(indiceDato, auxData);
+                                auxData = father.values[indiceDato + 1];
+                                father.values.RemoveAt(indiceDato + 1);
+                                father.ConvertNodetoString();
+                                currentNode.values.Insert(0, auxData);
+                                auxData = currentNode.values[currentNode.values.Count - 1];
+                                if (i != indexBrother)
+                                {
+                                    currentNode.values.RemoveAt(currentNode.values.Count - 1);
+                                }
+                                indiceDato++;
+                            }
+                            else
+                            {
+                                auxData = currentNode.values[currentNode.values.Count - 1];
+                                currentNode.values.RemoveAt(currentNode.values.Count - 1);
+                            }
+
+                            currentNode.ConvertNodetoString();
+                            carry = true;
+                        }
+                    }
+                    else
+                    {
+                        var indexData = indexCurrent == 0 ? 0 : indexCurrent - 1;
+                        indexBrother = indexCurrent - 1 >= 0 ? indexCurrent - 1 : indexCurrent + 1;
+                        var brother = Node<T>.ConvertToNodo(father.children[indexBrother]);
+                        var auxList = new List<T>();
+                        var auxNode = new Node<T>(father.index) { index = header[2], values = new List<T>(), children = new List<int>() };
+
+                        if (indexCurrent - 1 == indexBrother)
+                        {
+                            foreach (var item in brother.values)
+                            {
+                                auxList.Add(item);
+                            }
+                            auxList.Add(father.values[indexData]);
+                            foreach (var item in currentNode.values)
+                            {
+                                auxList.Add(item);
+                            }
+                            var quantityDivided = (auxList.Count - 2) / 3;
+
+                            auxNode.values.AddRange(auxList.GetRange(0, quantityDivided));
+                            auxList.RemoveRange(0, quantityDivided);
+
+                            father.values.RemoveAt(indexData);
+                            father.values.Insert(indexData, auxList[0]);
+                            auxList.RemoveAt(0);
+
+                            brother.values.Clear();
+                            brother.values.AddRange(auxList.GetRange(0, quantityDivided));
+                            auxList.RemoveRange(0, quantityDivided);
+
+                            father.values.Insert(indexData + 1, auxList[0]);
+                            auxList.RemoveAt(0);
+
+                            currentNode.values.Clear();
+                            currentNode.values.AddRange(auxList.GetRange(0, quantityDivided));
+
+                            indexBrother = indexCurrent - 1 >= 0 ? indexCurrent - 1 : indexCurrent + 2;
+                            father.children.Insert(indexBrother, auxNode.index);
+                        }
+                        else
+                        {
+                            foreach (var item in currentNode.values)
+                            {
+                                auxList.Add(item);
+                            }
+                            auxList.Add(father.values[indexData]);
+                            foreach (var item in brother.values)
+                            {
+                                auxList.Add(item);
+                            }
+                            var dividedQ = (auxList.Count - 2) / 3;
+
+                            currentNode.values.Clear();
+                            currentNode.values.AddRange(auxList.GetRange(0, dividedQ));
+                            auxList.RemoveRange(0, dividedQ);
+
+                            father.values.RemoveAt(indexData);
+                            father.values.Insert(indexData, auxList[0]);
+                            auxList.RemoveAt(0);
+
+                            brother.values.Clear();
+                            brother.values.AddRange(auxList.GetRange(0, dividedQ));
+                            auxList.RemoveRange(0, dividedQ);
+
+                            father.values.Insert(indexData + 1, auxList[0]);
+                            auxList.RemoveAt(0);
+
+                            auxNode.values.AddRange(auxList.GetRange(0, dividedQ));
+
+                            father.children.Insert(indexBrother + 1, auxNode.index);
+                        }
+
+                        if (father.values.Count > father.numberValues)
+                        {
+                            data = father.values[0];
+                            father.values.RemoveAt(0);
+                            positionSon = father.children.IndexOf(auxNode.index);
+                            father.children.RemoveAt(positionSon);
+                            son = auxNode.index;
+                            flagCarry = true;
+                            flagSon = true;
+                        }
+
+                        auxNode.ConvertNodetoString();
+                        father.ConvertNodetoString();
+                        brother.ConvertNodetoString();
+                        header[2]++;
+                        Header(header);
+                    }
                 }
-                if (LiberarHoja == false)
+                else
                 {
-                    validar = 1;
+                    header = Header();
+                    var positionMedia = currentNode.values.Count % 2 == 0 ? (currentNode.values.Count - 1) / 2 : currentNode.values.Count / 2;
+                    var dadBrother = currentNode.father == 0 ? header[2] + 1 : currentNode.father;
+                    var nodeBrother = new Node<T>(dadBrother) { index = header[2], values = currentNode.values.GetRange(0, positionMedia) };
+
+                    header[2]++;
+
+                    if (currentNode.children.Count != 0)
+                    {
+                        nodeBrother.children = currentNode.children.GetRange(0, positionMedia + 1);
+                        currentNode.children.RemoveRange(0, positionMedia + 1);
+
+                        foreach (var item in nodeBrother.children)
+                        {
+                            var nodeSon = Node<T>.ConvertToNodo(item);
+
+                            nodeSon.father = nodeBrother.index;
+                            nodeSon.ConvertNodetoString();
+                        }
+                    }
+
+                    if (currentNode.father == 0)
+                    {
+                        var nodeFather = new Node<T>(0) { values = new List<T> { currentNode.values[positionMedia] }, children = new List<int> { nodeBrother.index, currentNode.index }, index = header[2] };
+                        header[1] = header[2];
+                        header[2]++;
+                        nodeFather.ConvertNodetoString();
+                        nodeBrother.father = nodeFather.index;
+                        currentNode.father = nodeFather.index;
+                    }
+                    else
+                    {
+                        var fatherNode = Node<T>.ConvertToNodo(currentNode.father);
+
+                        data = currentNode.values[positionMedia];
+                        position = 0;
+                        while (position < fatherNode.values.Count && fatherNode.values[position].CompareTo(data) == -1)
+                        {
+                            position++;
+                        }
+                        fatherNode.values.Insert(position, data);
+                        fatherNode.children.Insert(fatherNode.children.IndexOf(currentNode.index), nodeBrother.index);
+
+                        if (fatherNode.values.Count > fatherNode.numberValues)
+                        {
+                            data = fatherNode.values[0];
+                            fatherNode.values.RemoveAt(0);
+                            positionSon = fatherNode.children.IndexOf(nodeBrother.index);
+                            fatherNode.children.RemoveAt(positionSon);
+                            son = nodeBrother.index;
+                            flagCarry = true;
+                            flagSon = true;
+                        }
+                        fatherNode.ConvertNodetoString();
+                    }
+                    currentNode.values.RemoveRange(0, positionMedia + 1);
+                    currentNode.ConvertNodetoString();
+                    nodeBrother.ConvertNodetoString();
+                    Header(header);
                 }
             }
-            Recorrido(raiz);
-            EscribirArchivo(num + 4);
-            Arbollista.Clear();
+            if (flagFirst)
+            {
+                currentNode.ConvertNodetoString();
+                flagFirst = false;
+            }
         }
-        #endregion
+
+        static int Rotate(Node<T> father, int indexList, int[] header)
+        {
+            var auxNode = new Node<T>(1);
+
+            if (indexList - 1 >= 0)
+            {
+                auxNode = Node<T>.ConvertToNodo(father.children[indexList - 1]);
+                if (auxNode.values.Count < auxNode.numberValues)
+                {
+                    return indexList - 1;
+                }
+            }
+            if (indexList + 1 < father.children.Count)
+            {
+                auxNode = Node<T>.ConvertToNodo(father.children[indexList + 1]);
+                if (auxNode.values.Count < auxNode.numberValues)
+                {
+                    return indexList + 1;
+                }
+            }
+            if (indexList - 2 >= 0)
+            {
+                for (int i = indexList - 2; i >= 0; i--)
+                {
+                    auxNode = Node<T>.ConvertToNodo(father.children[i]);
+                    if (auxNode.values.Count < auxNode.numberValues)
+                    {
+                        return i;
+                    }
+                }
+            }
+            if (indexList + 2 < father.children.Count)
+            {
+                for (int i = indexList + 2; i < father.children.Count; i++)
+                {
+                    auxNode = Node<T>.ConvertToNodo(father.children[i]);
+                    if (auxNode.values.Count < auxNode.numberValues)
+                    {
+                        return i;
+                    }
+                }
+            }
+            return indexList;
+        }
+
+
+
+
+
 
     }
 }

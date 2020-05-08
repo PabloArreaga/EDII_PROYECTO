@@ -15,7 +15,7 @@ namespace EDII_PROYECTO.ArbolB
         public int numberValues;
         public List<int> children =new List<int>();
         public List<T> values = new List<T>();
-        static int lenght = 500;
+        static int lenght = 300;
         public Node(int dad)
         {
             if (dad == 0)
@@ -28,65 +28,111 @@ namespace EDII_PROYECTO.ArbolB
             }
             this.father = dad;
         }
-        static string bufferToString(byte[] linea)
-        {
-            var aux = string.Empty;
 
-            foreach (var letra in linea)
-            {
-                aux += (char)letra;
-            }
-            return aux;
-        }
-        static byte[] stringToBuffer(string linea)
+        // string
+        public static Node<T> ConvertToNodo(int position)
         {
-            var aux = new List<byte>();
-            foreach (var letra in linea)
-            {
-                aux.Add((byte)letra);
-            }
-            return aux.ToArray();
-        }
-        public static Node<T> StringToNodo(int posicion)
-        {
-            var cantHijos = ((4 * (Data.Instance.grade- 1)) / 3) + 1;
-            var cantCaracteres = 8 + (4 * cantHijos) + (lenght * (cantHijos - 1));
-            //Lee la linea de archivo de texto que contiene el nodo
+            var numberChildren = ((4 * (Data.Instance.grade - 1)) / 3) + 1;
+            var cantCaracteres = 8 + (4 * numberChildren) + (lenght * (numberChildren - 1));
             var buffer = new byte[cantCaracteres];
-            using (var fs = new FileStream(Data.Instance.adress, FileMode.OpenOrCreate))
+            using (var file = new FileStream(Data.Instance.adress, FileMode.OpenOrCreate))
             {
-                fs.Seek((posicion - 1) * cantCaracteres + 15, SeekOrigin.Begin);
-                fs.Read(buffer, 0, cantCaracteres);
+                file.Seek((position - 1) * cantCaracteres + 15, SeekOrigin.Begin);
+                file.Read(buffer, 0, cantCaracteres);
             }
-            var nodeString = bufferToString(buffer);//Divide los valores para llenar el nodo que se va a utilizar
-            var values = new List<string>();
-            for (int i = 0; i < cantHijos + 2; i++)
+
+            var toString = ConverToString(buffer);
+            var listValue = new List<string>();
+            for (int i = 0; i < numberChildren + 2; i++)
             {
-                values.Add(nodeString.Substring(0, 4));
-                nodeString = nodeString.Substring(4);
+                listValue.Add(toString.Substring(0, 4));
+                toString = toString.Substring(4);
             }
-            for (int i = 0; i < cantHijos - 1; i++)
+
+            for (int i = 0; i < numberChildren - 1; i++)
             {
-                values.Add(nodeString.Substring(0, lenght));
-                nodeString = nodeString.Substring(lenght);
+                listValue.Add(toString.Substring(0, lenght));
+                toString = toString.Substring(lenght);
             }
-            var NodoSalida = new Node<T>(Convert.ToInt32(values[1]));
-            NodoSalida.index = Convert.ToInt32(values[0]);
-            for (int i = 2; i < (2 + cantHijos); i++)
+
+            var finalNode = new Node<T>(Convert.ToInt32(listValue[1]));
+
+            finalNode.index = Convert.ToInt32(listValue[0]);
+            for (int i = 2; i < (2 + numberChildren); i++)
             {
-                if (values[i].Trim() != "-")
+                if (listValue[i].Trim() != "-")
                 {
-                    NodoSalida.children.Add(Convert.ToInt32(values[i]));
+                    finalNode.children.Add(Convert.ToInt32(listValue[i]));
                 }
             }
-            for (int i = (2 + cantHijos); i < (1 + (2 * cantHijos)); i++)
+
+            for (int i = (2 + numberChildren); i < (1 + (2 * numberChildren)); i++)
             {
-                if (values[i].Trim() != "-")
+                if (listValue[i].Trim() != "-")
                 {
-                    NodoSalida.values.Add((T)Data.Instance.getNode.DynamicInvoke(values[i]));
+                    finalNode.values.Add((T)Data.Instance.getNode.DynamicInvoke(listValue[i]));
                 }
             }
-            return NodoSalida;
+
+            return finalNode;
         }
+        //buffer
+        static string ConverToString(byte[] texttLine)
+        {
+            var auxText = string.Empty;
+
+            foreach (var item in texttLine)
+            {
+                auxText += (char)item;
+            }
+            return auxText;
+        }
+        //string
+        static byte[] ConvertToBuffer(string texttLine)
+        {
+            var auxTextt = new List<byte>();
+            foreach (var item in texttLine)
+            {
+                auxTextt.Add((byte)item);
+            }
+            return auxTextt.ToArray();
+        }
+
+        
+
+        public void ConvertNodetoString()
+        {
+            string childrenString = string.Empty;
+            string valuesString = string.Empty;
+
+            var numberChildren = ((4 * (Data.Instance.grade - 1)) / 3) + 1;
+
+            foreach (var item in children)
+            {
+                childrenString += item.ToString("0000;-0000");
+            }
+            for (int i = children.Count; i < numberChildren; i++)
+            {
+                childrenString += string.Format("{0,-4}", "-");
+            }
+
+            foreach (var item in values)
+            {
+                valuesString += Convert.ToString(Data.Instance.getText.DynamicInvoke(item));
+            }
+
+            for (int i = values.Count; i < (numberChildren - 1); i++)
+            {
+                valuesString += string.Format("{0,-300}", "-");
+            }
+            var textNode = ($"{index.ToString("0000;-0000")}{father.ToString("0000;-0000")}{childrenString}{valuesString}");
+            var numberCharacter = 8 + (4 * numberChildren) + (lenght * (numberChildren - 1));
+            using (var file = new FileStream(Data.Instance.adress, FileMode.OpenOrCreate))
+            {
+                file.Seek((index - 1) * numberCharacter + 15, SeekOrigin.Begin);
+                file.Write(ConvertToBuffer(textNode), 0, numberCharacter);
+            }
+        }
+
     }
 }
