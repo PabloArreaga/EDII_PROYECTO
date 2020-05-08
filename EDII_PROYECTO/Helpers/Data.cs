@@ -17,6 +17,7 @@ namespace EDII_PROYECTO.Helpers
                 return _instance;
             }
         }
+        public List<tipo> ClavesParaLlave = new List<tipo>();
         public List<tipo> DatosGenerados = new List<tipo>();//Lista clase
         public int grade;
         public Delegate getNode;
