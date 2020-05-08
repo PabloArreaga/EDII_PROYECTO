@@ -11,7 +11,7 @@ namespace EDII_PROYECTO.ArbolB
         public int index;
         public int father;
         public int numberValues;
-        public List<int> children = new List<int>();
+        public List<int> children =new List<int>();
         public List<T> values = new List<T>();
         static int lenght = 500;
 

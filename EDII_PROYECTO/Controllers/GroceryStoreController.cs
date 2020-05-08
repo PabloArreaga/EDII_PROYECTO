@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static EDII_PROYECTO.Encrip.InfoSDES;
 
 namespace EDII_PROYECTO.Controllers
 {
@@ -12,6 +13,26 @@ namespace EDII_PROYECTO.Controllers
 
     public class GroceryStoreController : ControllerBase
     {
-        private static readonly string prueba = "Hola mundo, Esto será modificado en el futuro";
+        [Route("Store")]
+        [HttpPost]
+        public ActionResult PostStore(Datos mySdes)
+        {
+
+            return Ok();
+        }
+        [Route("Product")]
+        [HttpPost]
+        public ActionResult postProduct()
+        {
+
+            return Ok();
+        }
+        [Route("Product-Store")]
+        [HttpPost]
+        public ActionResult postStoreProduct()
+        {
+
+            return Ok();
+        }
     }
 }
