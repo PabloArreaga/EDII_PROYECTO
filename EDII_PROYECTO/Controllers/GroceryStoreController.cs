@@ -6,9 +6,15 @@ using EDII_PROYECTO.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static EDII_PROYECTO.Encrip.EncriptarSDES;
+using EDII_PROYECTO.Helpers;
+using EDII_PROYECTO.ArbolB;
 
 namespace EDII_PROYECTO.Controllers
 {
+    delegate string ConvertToString(object obj);
+    delegate object ConvertToObject(string obj);
+    delegate object Modify(object obj, string[] txt);
+
     [ApiController]
     [Route("api/[controller]")]
 
@@ -16,11 +22,13 @@ namespace EDII_PROYECTO.Controllers
     {
         [Route("Product")]
         [HttpPost]
-        public ActionResult postProduct(Product producto)//Datos principales para el nodo
+        public ActionResult postProduct(Comp_Product producto)//Datos principales para el nodo
         {
-            if (producto.Description != null && producto.Id > 0 && producto.Name != null && producto.Price >= 0)
+            if ( producto._id > 0 && producto._name != null && producto._price >= 0)
             {
-
+                Data.Instance.key = 15;
+                BTree<Comp_Product>.Create("Product", new ConvertToObject(Comp_Product.ConvertToObject), new ConvertToString(Comp_Product.ConverttToString));
+                BTree<Comp_Product>.ValidateEdit(producto, new string[2] { producto._name, producto._price.ToString() }, new Modify(Comp_Product.Modify));
             }
             else
             {

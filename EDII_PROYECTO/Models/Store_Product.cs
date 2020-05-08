@@ -11,5 +11,8 @@ namespace EDII_PROYECTO.Models
         public int IdProduct { get; set; }
         public int Stock { get; set; }
 
+
+
+
     }
 }

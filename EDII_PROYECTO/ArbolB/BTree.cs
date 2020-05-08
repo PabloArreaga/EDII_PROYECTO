@@ -14,11 +14,11 @@ namespace EDII_PROYECTO.ArbolB
         public static void Create(string nameFile, Delegate gNode, Delegate gText)
         {
             var grade = 7;
-            Data.Instance.adress = $"Datos\\{nameFile}.txt";
+            Data.Instance.adress = $"Database\\{nameFile}.txt";
 
-            if (!Directory.Exists("Datos"))
+            if (!Directory.Exists("Database"))
             {
-                Directory.CreateDirectory("Datos");
+                Directory.CreateDirectory("Database");
             }
             if (!File.Exists(Data.Instance.adress))
             {
@@ -54,11 +54,6 @@ namespace EDII_PROYECTO.ArbolB
 
         public static void ValidateIncert(T data)
         {
-            /*METADATA
-             * [0] = grade
-             * [1] = root
-             * [2] = Posicion siguiente
-            */
             var auxHeader = Header();
             Data.Instance.grade = auxHeader[0];
 
@@ -130,7 +125,6 @@ namespace EDII_PROYECTO.ArbolB
                     var father = Node<T>.ConvertToNodo(currentNode.father);
                     var indexCurrent = father.children.IndexOf(currentNode.index);
                     var indexBrother = Rotate(father, indexCurrent, header);
-                    //var dataIndex = indexCurrent == 0 ? 0 : indexCurrent - 1;
                     T auxData = currentNode.values[0];
                     var carry = false;
 
@@ -407,9 +401,103 @@ namespace EDII_PROYECTO.ArbolB
             return indexList;
         }
 
+        public static List<T> Traversal(T data, int option = 0)
+        {
+            var auxTraversal = new List<T>();
+            var header = Header();
+            Data.Instance.grade = header[0];
+            if (header[1] != 0)
+            {
+                var root = Node<T>.ConvertToNodo(header[1]);
+                var flagNest = true;
 
+                switch (option)
+                {
+                    case 0:
+                        TraversalsIn(root);
+                        break;
+                    case 1:
+                        Search(root, data, ref flagNest);
+                        break;
+                }
+            }
 
+            return auxTraversal;
+        }
 
+        static List<T> auxTraversal;
+        static void TraversalsIn(Node<T> currentNode)
+        {
+            if (currentNode.children.Count == 0)
+            {
+                foreach (var item in currentNode.values)
+                {
+                    auxTraversal.Add(item);
+                }
+            }
+            else
+            {
+                var positionData = 1;
+                foreach (var item in currentNode.children)
+                {
+                    TraversalsIn(Node<T>.ConvertToNodo(item));
+                    if (positionData < currentNode.children.Count)
+                    {
+                        auxTraversal.Add(currentNode.values[positionData - 1]);
+                        positionData++;
+                    }
+                }
+            }
+        }
+
+        static void Search(Node<T> currentNode, T data, ref bool flagNext)
+        {
+            var position = 0;
+            while (flagNext && position < currentNode.values.Count && (currentNode.values[position].CompareTo(data) == -1 || currentNode.values[position].CompareTo(data) == 0))
+            {
+                if (currentNode.values[position].CompareTo(data) == 0)
+                {
+                    flagNext = false;
+                    auxTraversal.Add(currentNode.values[position]);
+                }
+                position++;
+            }
+            if (flagNext && currentNode.children.Count != 0)
+            {
+                Search(Node<T>.ConvertToNodo(currentNode.children[position]), data, ref flagNext);
+            }
+        }
+
+        public static void ValidateEdit(T data, string[] newText, Delegate edit)
+        {
+            var header = Header();
+            Data.Instance.grade = header[0];
+            if (header[1] != 0)
+            {
+                var root = Node<T>.ConvertToNodo(header[1]);
+                var flagNext = true;
+                ValidateEdit(root, data, newText, edit, ref flagNext);
+            }
+        }
+
+        static void ValidateEdit(Node<T> currentNode, T data, string[] nuevo, Delegate edit, ref bool flagNext)
+        {
+            var position = 0;
+            while (flagNext && position < currentNode.values.Count && (currentNode.values[position].CompareTo(data) == -1 || currentNode.values[position].CompareTo(data) == 0))
+            {
+                if (currentNode.values[position].CompareTo(data) == 0)
+                {
+                    flagNext = false;
+                    edit.DynamicInvoke(currentNode.values[position], nuevo);
+                    currentNode.ConvertNodetoString();
+                }
+                position++;
+            }
+            if (flagNext && currentNode.children.Count != 0)
+            {
+                ValidateEdit(Node<T>.ConvertToNodo(currentNode.children[position]), data, nuevo, edit, ref flagNext);
+            }
+        }
 
 
     }
