@@ -1,6 +1,7 @@
 ﻿using EDII_PROYECTO.Models;
 using System;
 using System.Collections.Generic;
+using EDII_PROYECTO.Huffman;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,8 +18,10 @@ namespace EDII_PROYECTO.Helpers
                 return _instance;
             }
         }
+        public List<CaracterCodigo> ListaCod = new List<CaracterCodigo>();
+        public Dictionary<string, byte> DicCarcacteres = new Dictionary<string, byte>();
         public List<tipo> ClavesParaLlave = new List<tipo>();
-        public List<tipo> DatosGenerados = new List<tipo>();//Lista clase
+        public List<tipo> DatosGenerados = new List<tipo>();
         public int grade;
         public Delegate getNode;
         public Delegate getText;

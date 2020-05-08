@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using static EDII_PROYECTO.Encrip.EncriptarSDES;
 using EDII_PROYECTO.Helpers;
 using EDII_PROYECTO.ArbolB;
+using System.IO;
+using EDII_PROYECTO.Huffman;
 
 namespace EDII_PROYECTO.Controllers
 {
@@ -24,7 +26,7 @@ namespace EDII_PROYECTO.Controllers
         [HttpPost]
         public ActionResult postProduct(Comp_Product producto)//Datos principales para el nodo
         {
-            if ( producto._id > 0 && producto._name != null && producto._price >= 0)
+            if (producto._id > 0 && producto._name != null && producto._price >= 0)
             {
                 Data.Instance.key = 15;
                 BTree<Comp_Product>.Create("Product", new ConvertToObject(Comp_Product.ConvertToObject), new ConvertToString(Comp_Product.ConverttToString));
@@ -66,5 +68,45 @@ namespace EDII_PROYECTO.Controllers
             }
             return Ok();
         }
+        [Route("Exportar")]
+        [HttpPost]
+        public ActionResult Post(IFormFile File)
+        {
+            try
+            {
+                var extensionTipo = Path.GetExtension(File.FileName);
+                var directorio = "TusArchivos/" + File.FileName;
+                CompressHuffman HuffmanCompress = new CompressHuffman();
+                if (extensionTipo == ".txt")
+                {
+                    using (FileStream thisFile = new FileStream(directorio, FileMode.OpenOrCreate))
+                    {
+                        if (thisFile.Length == 0)
+                        {
+                            return BadRequest(new string[] { "Por favor guarde el archivo en: " + directorio });
+                        }
+                        HuffmanCompress.CompresionHuffman(thisFile);
+                    }
+                }
+                else if (extensionTipo == ".huff")
+                {
+                    using (FileStream thisFile = new FileStream("TusArchivos/" + File.FileName, FileMode.OpenOrCreate))
+                    {
+                        if (thisFile.Length == 0)
+                        {
+                            return BadRequest(new string[] { "Por favor guarde el archivo en: " + directorio });
+                        }
+                        HuffmanCompress.DescompresionHuffman(thisFile);
+                    }
+                }
+                else { return NotFound(); }
+                return Ok();
+            }
+            catch (System.NullReferenceException)//No se envia nada
+            {
+                return NotFound();
+            }
+        }
     }
+}
 }
