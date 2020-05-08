@@ -20,6 +20,7 @@ namespace EDII_PROYECTO.Helpers
         }
         public List<CaracterCodigo> ListaCod = new List<CaracterCodigo>();
         public Dictionary<string, byte> DicCarcacteres = new Dictionary<string, byte>();
+        public string DirectorioHuff;
         public List<tipo> ClavesParaLlave = new List<tipo>();
         public List<tipo> DatosGenerados = new List<tipo>();
         public int grade;

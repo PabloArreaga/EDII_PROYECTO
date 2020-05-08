@@ -10,6 +10,7 @@ using EDII_PROYECTO.Helpers;
 using EDII_PROYECTO.ArbolB;
 using System.IO;
 using EDII_PROYECTO.Huffman;
+using Newtonsoft.Json.Linq;
 
 namespace EDII_PROYECTO.Controllers
 {
@@ -77,7 +78,7 @@ namespace EDII_PROYECTO.Controllers
                 var extensionTipo = Path.GetExtension(File.FileName);
                 var directorio = "TusArchivos/" + File.FileName;
                 CompressHuffman HuffmanCompress = new CompressHuffman();
-                if (extensionTipo == ".txt")
+                if (extensionTipo == ".txt")//Para exportar
                 {
                     using (FileStream thisFile = new FileStream(directorio, FileMode.OpenOrCreate))
                     {
@@ -88,7 +89,7 @@ namespace EDII_PROYECTO.Controllers
                         HuffmanCompress.CompresionHuffman(thisFile);
                     }
                 }
-                else if (extensionTipo == ".huff")
+                else if (extensionTipo == ".huff")//Guarda en el arbol
                 {
                     using (FileStream thisFile = new FileStream("TusArchivos/" + File.FileName, FileMode.OpenOrCreate))
                     {
@@ -97,16 +98,28 @@ namespace EDII_PROYECTO.Controllers
                             return BadRequest(new string[] { "Por favor guarde el archivo en: " + directorio });
                         }
                         HuffmanCompress.DescompresionHuffman(thisFile);
+                        var nombre = Path.GetFileNameWithoutExtension(thisFile.Name);
+                        nombre = nombre.Replace("IMPORTADO_", string.Empty);
+                        using (StreamReader newfile = new StreamReader("TusArchivos/" + nombre + ".txt"))
+                        {
+                            var texto = string.Empty;
+                            var linea = string.Empty;
+                            while ((linea = newfile.ReadLine()) != null)
+                            {
+                                texto += linea.Trim();
+
+                            }
+                            JObject convertJSON = JObject.Parse(texto);
+                        }
                     }
                 }
-                else { return NotFound(); }
+                else { return BadRequest(new string[] { "Extensión no valida" }); }
                 return Ok();
             }
             catch (System.NullReferenceException)//No se envia nada
             {
-                return NotFound();
+                return NotFound(new string[] { "Porfavor seleccione un archivo" });
             }
         }
     }
-}
 }

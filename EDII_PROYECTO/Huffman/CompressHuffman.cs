@@ -22,6 +22,7 @@ namespace EDII_PROYECTO.Huffman
             int cantidadCaracteres = huffman.Leer(direccion);
             huffman.CrearArbol();
             byte[] encabezado = huffman.CrearEncabezado(cantidadCaracteres);
+            nombreArchivo = nombreArchivo.Replace("EXPORTADO_", string.Empty);
             using (FileStream ArchivoComprimir = new FileStream("TusArchivos/IMPORTADO_" + nombreArchivo + ".huff", FileMode.OpenOrCreate, FileAccess.ReadWrite))
             {
                 foreach (var item in encabezado)
@@ -75,8 +76,10 @@ namespace EDII_PROYECTO.Huffman
         public void DescompresionHuffman(FileStream ArchivoImportado)
         {
             string nombreArchivo = Path.GetFileNameWithoutExtension(ArchivoImportado.Name);
+            nombreArchivo = nombreArchivo.Replace("IMPORTADO_", string.Empty);
             using (FileStream archivo = new FileStream("TusArchivos/EXPORTADO_" + nombreArchivo + ".txt", FileMode.OpenOrCreate, FileAccess.ReadWrite))
             {
+                Data.Instance.DirectorioHuff = archivo.Name;
                 int contador = 0;
                 int contadorCarac = 0;
                 int CantCaracteres = 0;
