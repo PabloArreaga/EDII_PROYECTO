@@ -15,6 +15,5 @@ namespace EDII_PROYECTO.Models
 		{
 			return this.Id.CompareTo(((Store)obj).Id);
 		}
-
 	}
 }

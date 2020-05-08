@@ -14,16 +14,10 @@ namespace EDII_PROYECTO.ArbolB
         public List<int> children =new List<int>();
         public List<T> values = new List<T>();
         static int lenght = 500;
-
         public Node(int dad)
         {
             // faltan condicionales
             this.father = dad;   
         }
-
-
-
-       
-       
     }
 }

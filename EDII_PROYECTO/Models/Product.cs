@@ -17,7 +17,6 @@ namespace EDII_PROYECTO.Models
 		{
 			return this.Id.CompareTo(((Product)obj).Id);
 		}
-
         public static string ConvertToString(object dataNode)
         {
             var auxNode = (Product)dataNode;
@@ -40,7 +39,6 @@ namespace EDII_PROYECTO.Models
             }
             return $"{string.Format("{0,-100}", auxNode.Id.ToString())}{string.Format("{0,-100}", auxNode.Name)}{string.Format("{0,-100}", auxNode.Description)}{string.Format("{0,-100}", auxNode.Price.ToString())}";
         }
-
         public static Product ConvertToProducto(string dataNode)
         {
             var separateInformation = new List<string>();

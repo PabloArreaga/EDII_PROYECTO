@@ -5,23 +5,22 @@ using System.Threading.Tasks;
 
 namespace EDII_PROYECTO.Models
 {
-	public class Store_Product : IComparable
-	{
-		int IdStore { get; set; }
-		int IdProduct { get; set; }
-		int Stock { get; set; }
+    public class Store_Product : IComparable
+    {
+        public int IdStore { get; set; }
+        public int IdProduct { get; set; }
+        public int Stock { get; set; }
 
-		public int CompareTo(object obj)
-		{
-			if (this.IdStore.Equals(((Store_Product)obj).IdStore))
-			{
-				return this.IdProduct.CompareTo(((Store_Product)obj).IdProduct);
-			}
-			else
-			{
-				return 0; // no encontro coincidencia con la tienda
-			}
-			
-		}
-	}
+        public int CompareTo(object obj)
+        {
+            if (this.IdStore.Equals(((Store_Product)obj).IdStore))
+            {
+                return this.IdProduct.CompareTo(((Store_Product)obj).IdProduct);
+            }
+            else
+            {
+                return 0; // no encontro coincidencia con la tienda
+            }
+        }
+    }
 }

@@ -9,7 +9,7 @@ namespace EDII_PROYECTO.Encrip
     {
         public class Datos
         {
-            public int BinarioDiez { get; set; }
+            public int BinarioDiez { get; set; } = 127;
         }
     }
 }
