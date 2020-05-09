@@ -34,7 +34,7 @@ namespace EDII_PROYECTO.ArbolB
             var buffer = new byte[cantCaracteres];
             using (var file = new FileStream(Data.Instance.adress, FileMode.OpenOrCreate))
             {
-                file.Seek((position - 1) * cantCaracteres + 15, SeekOrigin.Begin);
+                file.Seek((position - 1) * cantCaracteres + 19, SeekOrigin.Begin);
                 file.Read(buffer, 0, cantCaracteres);
             }
 
@@ -126,7 +126,7 @@ namespace EDII_PROYECTO.ArbolB
             var numberCharacter = 8 + (4 * numberChildren) + (lenght * (numberChildren - 1));
             using (var file = new FileStream(Data.Instance.adress, FileMode.OpenOrCreate))
             {
-                file.Seek((index - 1) * numberCharacter + 15, SeekOrigin.Begin);
+                file.Seek((index - 1) * numberCharacter + 19, SeekOrigin.Begin);
                 file.Write(ConvertToBuffer(textNode), 0, numberCharacter);
             }
         }

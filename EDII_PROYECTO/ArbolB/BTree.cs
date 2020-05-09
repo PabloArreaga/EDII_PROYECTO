@@ -1,8 +1,8 @@
-﻿using EDII_PROYECTO.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using EDII_PROYECTO.Helpers;
+using System.IO;
 using System.Text;
 
 namespace EDII_PROYECTO.ArbolB
@@ -13,13 +13,14 @@ namespace EDII_PROYECTO.ArbolB
         {
             var grade = 7;
             Data.Instance.adress = $"Database\\{nameFile}.txt";
+
             if (!Directory.Exists("Database"))
             {
                 Directory.CreateDirectory("Database");
             }
             if (!File.Exists(Data.Instance.adress))
             {
-                string start = $"{grade.ToString("0000;-0000")}|0000|0001|";
+                string start = $"0000{grade.ToString("0000;-0000")}|0000|0001|";
                 File.WriteAllText(Data.Instance.adress, start);
             }
             Data.Instance.getNode = gNode;
@@ -28,12 +29,13 @@ namespace EDII_PROYECTO.ArbolB
 
         static int[] Header(int[] header = null)
         {
-            var buffer = new byte[14];
+            var buffer = new byte[15];
             using (var fileS = new FileStream(Data.Instance.adress, FileMode.OpenOrCreate))
             {
                 if (header == null)
                 {
-                    fileS.Read(buffer, 0, 14);
+                    fileS.Seek(4, SeekOrigin.Begin);
+                    fileS.Read(buffer, 0, 15);
                     var values = Encoding.UTF8.GetString(buffer).Split('|');
 
                     return new int[3] { Convert.ToInt32(values[0]), Convert.ToInt32(values[1]), Convert.ToInt32(values[2]) };
@@ -44,6 +46,7 @@ namespace EDII_PROYECTO.ArbolB
                 {
                     line = $"{line}{item.ToString("0000;-0000")}|";
                 }
+                fileS.Seek(4, SeekOrigin.Begin);
                 fileS.Write(Encoding.UTF8.GetBytes(line.ToCharArray()), 0, 15);
             }
             return null;
@@ -477,7 +480,7 @@ namespace EDII_PROYECTO.ArbolB
             }
         }
 
-        static void ValidateEdit(Node<T> currentNode, T data, string[] nuevo, Delegate edit, ref bool flagNext)
+        static void ValidateEdit(Node<T> currentNode, T data, string[] newtext, Delegate edit, ref bool flagNext)
         {
             var position = 0;
             while (flagNext && position < currentNode.values.Count && (currentNode.values[position].CompareTo(data) == -1 || currentNode.values[position].CompareTo(data) == 0))
@@ -485,15 +488,78 @@ namespace EDII_PROYECTO.ArbolB
                 if (currentNode.values[position].CompareTo(data) == 0)
                 {
                     flagNext = false;
-                    edit.DynamicInvoke(currentNode.values[position], nuevo);
+                    edit.DynamicInvoke(currentNode.values[position], newtext);
                     currentNode.ConvertNodetoString();
                 }
                 position++;
             }
             if (flagNext && currentNode.children.Count != 0)
             {
-                ValidateEdit(Node<T>.ConvertToNodo(currentNode.children[position]), data, nuevo, edit, ref flagNext);
+                ValidateEdit(Node<T>.ConvertToNodo(currentNode.children[position]), data, newtext, edit, ref flagNext);
             }
+        }
+
+        public static void Edit(int valueNew)
+        {
+            var header = Header();
+            Data.Instance.grade = header[0];
+            if (header[1] != 0)
+            {
+                var rootNode = Node<T>.ConvertToNodo(header[1]);
+                TraversalsEdit(rootNode, valueNew);
+            }
+        }
+
+        static void TraversalsEdit(Node<T> currentNode, int valueNew)
+        {
+            if (currentNode.children.Count == 0)
+            {
+                var nodeAux = new Node<T>(currentNode.father);
+                nodeAux.index = currentNode.index;
+                nodeAux.children = currentNode.children;
+                foreach (var item in currentNode.values)
+                {
+                    nodeAux.values.Add(item);
+                }
+                var lastValue = Data.Instance.key;
+                Data.Instance.key = valueNew;
+                nodeAux.ConvertNodetoString();
+                Data.Instance.key = lastValue;
+            }
+            else
+            {
+                var dataPosition = 1;
+                var nodeAux = new Node<T>(currentNode.father);
+                nodeAux.index = currentNode.index;
+                nodeAux.children = currentNode.children;
+                foreach (var item in currentNode.children)
+                {
+                    TraversalsEdit(Node<T>.ConvertToNodo(item), valueNew);
+                    if (dataPosition < currentNode.children.Count)
+                    {
+                        nodeAux.values.Add(currentNode.values[dataPosition - 1]);
+                        dataPosition++;
+                    }
+                }
+                var lastValue = Data.Instance.key;
+                Data.Instance.key = valueNew;
+                nodeAux.ConvertNodetoString();
+                Data.Instance.key = lastValue;
+            }
+        }
+
+        public static int KnowId()
+        {
+            var buffer = new byte[15];
+            var currentId = 0;
+            using (var fs = new FileStream(Data.Instance.adress, FileMode.OpenOrCreate))
+            {
+                fs.Read(buffer, 0, 4);
+                currentId = Convert.ToInt32(Encoding.UTF8.GetString(buffer)) + 1;
+                fs.Position = 0;
+                fs.Write(Encoding.UTF8.GetBytes(currentId.ToString("0000;-0000").ToCharArray()), 0, 4);
+            }
+            return currentId;
         }
 
 

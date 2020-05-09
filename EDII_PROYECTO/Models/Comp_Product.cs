@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using EDII_PROYECTO.ArbolB;
 
 namespace EDII_PROYECTO.Models
 {
@@ -49,6 +51,53 @@ namespace EDII_PROYECTO.Models
             return startData;
         }
 
-
+        public static void LoadInventory(Stream file)
+        {
+            using (var srFile = new StreamReader(file))
+            {
+                var readLine = string.Empty;
+                while ((readLine = srFile.ReadLine()) != null)
+                {
+                    var quotation = false;
+                    var fragment = new List<string>();
+                    var lineAux = string.Empty;
+                    foreach (var item in readLine)
+                    {
+                        if (quotation)
+                        {
+                            if (item == '\"')
+                            {
+                                quotation = false;
+                            }
+                            else
+                            {
+                                lineAux += item;
+                            }
+                        }
+                        else
+                        {
+                            if (item == ',')
+                            {
+                                fragment.Add(lineAux);
+                                lineAux = string.Empty;
+                            }
+                            else if (item == '\"')
+                            {
+                                quotation = true;
+                            }
+                            else
+                            {
+                                lineAux += item;
+                            }
+                        }
+                    }
+                    if (lineAux != string.Empty)
+                    {
+                        fragment.Add(lineAux);
+                    }
+                    BTree<Comp_Product>.ValidateIncert(new Comp_Product { _id = BTree<Comp_Product>.KnowId(), _name = fragment[0], _price = Convert.ToDouble(fragment[1]) });
+                }
+            }
+        }
     }
 }

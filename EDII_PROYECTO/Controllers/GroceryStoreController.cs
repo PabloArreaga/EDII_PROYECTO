@@ -1,5 +1,4 @@
 ﻿using EDII_PROYECTO.ArbolB;
-using EDII_PROYECTO.Helpers;
 using EDII_PROYECTO.Huffman;
 using EDII_PROYECTO.Models;
 using Microsoft.AspNetCore.Http;
@@ -21,34 +20,43 @@ namespace EDII_PROYECTO.Controllers
     {
         [Route("Product")]
         [HttpPost]
-        public ActionResult postProduct(Comp_Product producto)//Datos principales para el nodo
+        public ActionResult<IEnumerable<string>> postProduct([FromForm]Comp_Product product)//Datos principales para el nodo
         {
-            if (producto._id > 0 && producto._name != null && producto._price >= 0)
+            if (product._name != null && product._price >= 0)
             {
-                Data.Instance.key = 15;
-                BTree<Comp_Product>.Create("Product", new ConvertToObject(Comp_Product.ConvertToObject), new ConvertToString(Comp_Product.ConverttToString));
-                BTree<Comp_Product>.ValidateEdit(producto, new string[2] { producto._name, producto._price.ToString() }, new Modify(Comp_Product.Modify));
+                BTree<Comp_Product>.Create("TreeProducts", new ConvertToObject(Comp_Product.ConvertToObject), new ConvertToString(Comp_Product.ConverttToString));
+                BTree<Comp_Product>.ValidateIncert(new Comp_Product { _id = BTree<Comp_Product>.KnowId(), _name = product._name, _price = product._price });
             }
             else
             {
-                return BadRequest(new string[] { "Solicitud erronea" });
+                return BadRequest("Solicitud erronea");
             }
 
             //Llamar nodo y crear arbol
             return Ok();
         }
+        [Route("UploadInventory")]
+        [HttpPost]
+        public ActionResult<IEnumerable<string>> Inventory([FromForm]IFormFile file)//Datos principales para el nodo
+        {
+            BTree<Comp_Product>.Create("TreeProducts", new ConvertToObject(Comp_Product.ConvertToObject), new ConvertToString(Comp_Product.ConverttToString));
+            Comp_Product.LoadInventory(file.OpenReadStream());
+            return Ok();
+        }
         [Route("Store")]
         [HttpPost]
-        public ActionResult PostStore(Store tienda)
+        public ActionResult<IEnumerable<string>> postStore([FromForm]Comp_Store store)//Datos principales para el nodo
         {
-            if (tienda.Name != null && tienda.Id > 0 && tienda.Address != null)
+            if (store._name != null && store._address != null)
             {
-
+                BTree<Comp_Store>.Create("TreeStore", new ConvertToObject(Comp_Store.ConvertToObject), new ConvertToString(Comp_Store.ConvertToString));
+                BTree<Comp_Store>.ValidateIncert(new Comp_Store { _id = BTree<Comp_Store>.KnowId(), _name = store._name, _address = store._address });
             }
             else
             {
-                return BadRequest(new string[] { "Solicitud erronea" });
+                return BadRequest("Solicitud erronea");
             }
+            //Llamar nodo y crear arbol
             return Ok();
         }
         [Route("Product-Store")]
