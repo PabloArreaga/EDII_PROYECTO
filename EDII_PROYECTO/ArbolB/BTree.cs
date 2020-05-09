@@ -545,7 +545,6 @@ namespace EDII_PROYECTO.ArbolB
                 Data.Instance.key = lastValue;
             }
         }
-
         public static int KnowId()
         {
             var buffer = new byte[15];
@@ -559,7 +558,5 @@ namespace EDII_PROYECTO.ArbolB
             }
             return currentId;
         }
-
-
     }
 }

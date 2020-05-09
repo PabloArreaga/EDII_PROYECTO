@@ -21,7 +21,8 @@ namespace EDII_PROYECTO.Huffman
             huffman.CrearArbol();
             byte[] encabezado = huffman.CrearEncabezado(cantidadCaracteres);
             nombreArchivo = nombreArchivo.Replace("EXPORTADO_", string.Empty);
-            using (FileStream ArchivoComprimir = new FileStream("TusArchivos/IMPORTADO_" + nombreArchivo + ".huff", FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            Data.Instance.adress = $"Database\\{nombreArchivo}";
+            using (FileStream ArchivoComprimir = new FileStream(Data.Instance.adress + ".huff", FileMode.OpenOrCreate, FileAccess.ReadWrite))
             {
                 foreach (var item in encabezado)
                 {
@@ -63,19 +64,13 @@ namespace EDII_PROYECTO.Huffman
                     textoCifrado = textoCifrado.PadRight(8, '0');
                     byte byteEsc = Convert.ToByte(textoCifrado, 2);
                 }
-                PropiedadesArchivoActual.TamanoArchivoComprimido = ArchivoComprimir.Length;
-                PropiedadesArchivoActual.FactorCompresion = Convert.ToDouble(PropiedadesArchivoActual.TamanoArchivoComprimido) / Convert.ToDouble(PropiedadesArchivoActual.TamanoArchivoDescomprimido);
-                PropiedadesArchivoActual.RazonCompresion = Convert.ToDouble(PropiedadesArchivoActual.TamanoArchivoDescomprimido) / Convert.ToDouble(PropiedadesArchivoActual.TamanoArchivoComprimido);
-                PropiedadesArchivoActual.PorcentajeReduccion = (Convert.ToDouble(1) - PropiedadesArchivoActual.FactorCompresion).ToString();
-                PropiedadesArchivoActual.FormatoCompresion = ".lzw";
-                GuaradarCompresiones(PropiedadesArchivoActual, "Huffman");
             }
         }
         public void DescompresionHuffman(FileStream ArchivoImportado)
         {
             string nombreArchivo = Path.GetFileNameWithoutExtension(ArchivoImportado.Name);
             nombreArchivo = nombreArchivo.Replace("IMPORTADO_", string.Empty);
-            using (FileStream archivo = new FileStream("TusArchivos/EXPORTADO_" + nombreArchivo + ".txt", FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            using (FileStream archivo = new FileStream(Data.Instance.adress, FileMode.OpenOrCreate, FileAccess.ReadWrite))
             {
                 Data.Instance.DirectorioHuff = archivo.Name;
                 int contador = 0;
@@ -167,18 +162,7 @@ namespace EDII_PROYECTO.Huffman
                 }
             };
             Data.Instance.DicCarcacteres.Clear();
-        }
-        public void GuaradarCompresiones(Files Archivo, string tipo)
-        {
-            string ArchivoMapeo = "TusArchivos/" + tipo;
-            string archivoLeer = ArchivoMapeo + Path.GetFileName("ListaCompresiones");
-            using (var writer = new StreamWriter(archivoLeer, true))
-            {
-                if (!(Archivo.TamanoArchivoComprimido <= 0 && Archivo.TamanoArchivoDescomprimido <= 0))
-                {
-                    writer.WriteLine(Archivo.NombreArchivoOriginal + "|" + Archivo.TamanoArchivoDescomprimido + "|" + Archivo.TamanoArchivoComprimido + "|" + Archivo.FactorCompresion + "|" + Archivo.RazonCompresion + "|" + Archivo.PorcentajeReduccion + "|" + Archivo.FormatoCompresion);
-                }
-            }
+
         }
     }
 }

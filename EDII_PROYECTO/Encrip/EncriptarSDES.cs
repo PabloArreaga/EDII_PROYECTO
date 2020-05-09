@@ -8,10 +8,10 @@ namespace EDII_PROYECTO.Encrip
 {
     public class EncriptarSDES
     {
-        public void ConvertirBinario(Product LlaveBinaria)
+        public void ConvertirBinario(Comp_Product LlaveBinaria)
         {
             //Convierte el numero a binario
-            string binarioLlaveDiez = Convert.ToString(LlaveBinaria.BinarioDiez, 2);
+            string binarioLlaveDiez = Convert.ToString(LlaveBinaria._id, 2);
             if (binarioLlaveDiez.Length < 10)
             {
                 binarioLlaveDiez = binarioLlaveDiez.PadLeft(10, '0');

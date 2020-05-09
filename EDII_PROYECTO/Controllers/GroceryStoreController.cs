@@ -92,11 +92,11 @@ namespace EDII_PROYECTO.Controllers
             }
             else
             {
-                return BadRequest(new string[] { "Porfavor seleccione" });
+                return BadRequest(new string[] { "Porfavor seleccione: " + nombreTree + " , " + nombreTreeStore + " , " + nombreStore });
             }
             return Ok();
         }
-        [Route("IMPORTAR")]
+        [Route("IMPORTAR/{name}")]
         [HttpPost]
         public ActionResult PostHuffmanImportar(IFormFile File)
         {
@@ -105,63 +105,14 @@ namespace EDII_PROYECTO.Controllers
                 var extensionTipo = Path.GetExtension(File.FileName);
                 var directorio = "TusArchivos/" + File.FileName;
                 CompressHuffman HuffmanCompress = new CompressHuffman();
-                if (extensionTipo == ".huff")//Guarda en el arbol
+                var listaNodo = new List<AllData>();
+                using (FileStream thisFile = new FileStream("TusArchivos/" + File.FileName, FileMode.OpenOrCreate))
                 {
-                    using (FileStream thisFile = new FileStream("TusArchivos/" + File.FileName, FileMode.OpenOrCreate))
+                    if (thisFile.Length == 0)
                     {
-                        if (thisFile.Length == 0)
-                        {
-                            return BadRequest(new string[] { "Por favor guarde el archivo en: " + directorio });
-                        }
-                        HuffmanCompress.DescompresionHuffman(thisFile);
-                        var nombre = Path.GetFileNameWithoutExtension(thisFile.Name);
-                        nombre = nombre.Replace("IMPORTADO_", string.Empty);
-                        using (StreamReader newfile = new StreamReader("TusArchivos/" + nombre + ".txt"))
-                        {
-                            string texto = string.Empty;
-                            var linea = string.Empty;
-                            var listaNodo = new List<AllData>();
-                            while ((linea = newfile.ReadLine()) != null)
-                            {
-                                if (linea.Contains(":"))
-                                {
-                                    var toAdd = linea.Split(':');
-                                    toAdd[1] = toAdd[1].Trim(',');
-                                    listaNodo.Add(new AllData(toAdd[0].Trim(), toAdd[1].Trim()));
-                                }
-                            }
-                            var id = string.Empty;
-                            var name = string.Empty;
-                            var price = string.Empty;
-                            foreach (var item in listaNodo)
-                            {
-                                var type = item.TypeData.Trim('"');
-                                if (type == "_id")
-                                {
-                                    id = item.StringData;
-                                }
-                                else if (type == "_name")
-                                {
-                                    name = item.StringData;
-                                }
-                                else if (type == "_price")
-                                {
-                                    price = item.StringData;
-                                }
-                            }
-                            var nodoInterno = new Comp_Product
-                            {
-                                _id = Int32.Parse(id),
-                                _name = name,
-                                _price = Int32.Parse(price)
-                            };
-                            postProduct(nodoInterno);
-                        }
+                        return BadRequest(new string[] { "Por favor guarde el archivo en: " + directorio });
                     }
-                }
-                else
-                {
-                    return BadRequest(new string[] { "La extensión debe ser .huff" });
+                    HuffmanCompress.DescompresionHuffman(thisFile);
                 }
                 return Ok(new string[] { "Datos guardados" });
             }
@@ -181,7 +132,6 @@ namespace EDII_PROYECTO.Controllers
             public string TypeData { get; private set; }
             public string StringData { get; private set; }
         }
-
         [Route("DisplayProduct")]
         [HttpGet]
         public List<Comp_Product> getProduct([FromForm]int product)
@@ -285,11 +235,15 @@ namespace EDII_PROYECTO.Controllers
 
         }
 
-        [HttpGet, Route("Download/{name}")]
+        [HttpGet, Route("Export/{name}")]
         public async Task<FileStreamResult> FileDownload(string name)
         {
-            // mandas a llamar al metodo de compresion
-            return await Download($"TusArchivos\\{name}.txt");
+            using(var thisFile = new FileStream($"Database\\{name}.txt", FileMode.Open))
+            {
+                CompressHuffman HuffmanCompress = new CompressHuffman();
+                HuffmanCompress.CompresionHuffman(thisFile);
+            }
+            return await Download($"Database\\{name}.huff");
         }
         async Task<FileStreamResult> Download(string path)
         {
