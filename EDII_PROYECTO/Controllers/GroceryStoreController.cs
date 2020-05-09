@@ -69,9 +69,9 @@ namespace EDII_PROYECTO.Controllers
             }
             return Ok();
         }
-        [Route("Exportar")]
+        [Route("EXPORTAR")]
         [HttpPost]
-        public ActionResult Post(IFormFile File)
+        public ActionResult PostHuffmanExportar(IFormFile File)
         {
             try
             {
@@ -89,7 +89,24 @@ namespace EDII_PROYECTO.Controllers
                         HuffmanCompress.CompresionHuffman(thisFile);
                     }
                 }
-                else if (extensionTipo == ".huff")//Guarda en el arbol
+                else { return BadRequest(new string[] { "La extensión debe ser .txt" }); }
+                return Ok(new string[] { "Archivo comprimido exitosamente" });
+            }
+            catch (System.NullReferenceException)//No se envia nada
+            {
+                return NotFound(new string[] { "Porfavor seleccione un archivo" });
+            }
+        }
+        [Route("IMPORTAR")]
+        [HttpPost]
+        public ActionResult PostHuffmanImportar(IFormFile File)
+        {
+            try
+            {
+                var extensionTipo = Path.GetExtension(File.FileName);
+                var directorio = "TusArchivos/" + File.FileName;
+                CompressHuffman HuffmanCompress = new CompressHuffman();
+                if (extensionTipo == ".huff")//Guarda en el arbol
                 {
                     using (FileStream thisFile = new FileStream("TusArchivos/" + File.FileName, FileMode.OpenOrCreate))
                     {
@@ -131,7 +148,8 @@ namespace EDII_PROYECTO.Controllers
                                 else if (type == "_price")
                                 {
                                     price = item.StringData;
-                                }                            }
+                                }
+                            }
                             var nodoInterno = new Comp_Product
                             {
                                 _id = Int32.Parse(id),
@@ -142,11 +160,15 @@ namespace EDII_PROYECTO.Controllers
                         }
                     }
                 }
-                else { return BadRequest(new string[] { "Extensión no valida" }); }
-                return Ok();
+                else
+                {
+                    return BadRequest(new string[] { "La extensión debe ser .huff" });
+                }
+                return Ok(new string[] { "Datos guardados" });
             }
-            catch (System.NullReferenceException)//No se envia nada
+            catch (Exception)
             {
+
                 return NotFound(new string[] { "Porfavor seleccione un archivo" });
             }
         }
