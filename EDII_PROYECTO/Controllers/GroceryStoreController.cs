@@ -231,5 +231,29 @@ namespace EDII_PROYECTO.Controllers
             return BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = store, _idProduct =product }, true);
         }
 
+        [Route("DisplayProducts")]
+        [HttpGet]
+        public List<Comp_Product> getProducts()
+        {
+            BTree<Comp_Product>.Create("TreeStore", new ConvertToObject(Comp_Store.ConvertToObject), new ConvertToString(Comp_Store.ConvertToString));
+            return BTree<Comp_Product>.Traversal(null, false);
+        }
+
+        [Route("DisplayShops")]
+        [HttpGet]
+        public List<Comp_Store> getShops()
+        {
+            BTree<Comp_Store>.Create("TreeStore", new ConvertToObject(Comp_Store.ConvertToObject), new ConvertToString(Comp_Store.ConvertToString));
+            return BTree<Comp_Store>.Traversal(null, false);
+        }
+
+        [Route("DisplayStore-Products")]
+        [HttpGet]
+        public List<Comp_Store_Product> getStoreProducts([FromForm]int store, [FromForm] int product)
+        {
+            BTree<Comp_Store_Product>.Create("TreeStore", new ConvertToObject(Comp_Store.ConvertToObject), new ConvertToString(Comp_Store.ConvertToString));
+            return BTree<Comp_Store_Product>.Traversal(null, false);
+        }
+
     }
 }
