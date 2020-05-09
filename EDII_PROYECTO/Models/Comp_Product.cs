@@ -31,6 +31,7 @@ namespace EDII_PROYECTO.Models
                 dataSeparate.Add(data.Substring(0, 100));
                 data = data.Substring(100);
             }
+
             var price = 0.00;
             double.TryParse(dataSeparate[2].Trim(), out price);
 
@@ -41,6 +42,7 @@ namespace EDII_PROYECTO.Models
                 _price = price
             };
         }
+
         public static Comp_Product Modify(object data, string[] recientData)
         {
             var startData = (Comp_Product)data;
@@ -48,8 +50,6 @@ namespace EDII_PROYECTO.Models
             startData._price = recientData[1] == null ? startData._price : Convert.ToDouble(recientData[1]);
             return startData;
         }
-<<<<<<< HEAD
-=======
 
         public static void LoadInventory(Stream file)
         {
@@ -99,6 +99,5 @@ namespace EDII_PROYECTO.Models
                 }
             }
         }
->>>>>>> 4ef15cf92bbc4d17fe465fc85c77cca9632fffed
     }
 }

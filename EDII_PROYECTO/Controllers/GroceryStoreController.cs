@@ -48,12 +48,8 @@ namespace EDII_PROYECTO.Controllers
         {
             if (store._name != null && store._address != null)
             {
-<<<<<<< HEAD
-                
-=======
                 BTree<Comp_Store>.Create("TreeStore", new ConvertToObject(Comp_Store.ConvertToObject), new ConvertToString(Comp_Store.ConvertToString));
                 BTree<Comp_Store>.ValidateIncert(new Comp_Store { _id = BTree<Comp_Store>.KnowId(), _name = store._name, _address = store._address });
->>>>>>> 4ef15cf92bbc4d17fe465fc85c77cca9632fffed
             }
             else
             {
@@ -68,7 +64,7 @@ namespace EDII_PROYECTO.Controllers
             if (storeproduct._idStore >= 0 && storeproduct._idProduct >= 0 && storeproduct._stock >= 0)
             {
                 BTree<Comp_Store_Product>.Create("TreeStoreProduct", new ConvertToObject(Comp_Store_Product.ConvertToObject), new ConvertToString(Comp_Store_Product.ConvertToString));
-                BTree<Comp_Store_Product>.ValidateIncert(new Comp_Store_Product { _idStore = storeproduct._idStore, _idProduct = storeproduct._idProduct, _stock = storeproduct._stock});
+                BTree<Comp_Store_Product>.ValidateIncert(new Comp_Store_Product { _idStore = storeproduct._idStore, _idProduct = storeproduct._idProduct, _stock = storeproduct._stock });
             }
             else
             {
@@ -232,7 +228,7 @@ namespace EDII_PROYECTO.Controllers
             {
                 return null;
             }
-            return BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = store, _idProduct =product }, true);
+            return BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = store, _idProduct = product }, true);
         }
 
         [Route("DisplayProducts")]
@@ -258,6 +254,7 @@ namespace EDII_PROYECTO.Controllers
             BTree<Comp_Store_Product>.Create("TreeStore", new ConvertToObject(Comp_Store.ConvertToObject), new ConvertToString(Comp_Store.ConvertToString));
             return BTree<Comp_Store_Product>.Traversal(null, false);
         }
+
 
     }
 }
