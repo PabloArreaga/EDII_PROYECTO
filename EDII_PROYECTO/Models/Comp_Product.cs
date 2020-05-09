@@ -29,7 +29,6 @@ namespace EDII_PROYECTO.Models
                 dataSeparate.Add(data.Substring(0, 100));
                 data = data.Substring(100);
             }
-
             var price = 0.00;
             double.TryParse(dataSeparate[2].Trim(), out price);
 
@@ -40,7 +39,6 @@ namespace EDII_PROYECTO.Models
                 _price = price
             };
         }
-
         public static Comp_Product Modify(object data, string[] recientData)
         {
             var startData = (Comp_Product)data;
@@ -48,7 +46,5 @@ namespace EDII_PROYECTO.Models
             startData._price = recientData[1] == null ? startData._price : Convert.ToDouble(recientData[1]);
             return startData;
         }
-
-
     }
 }
