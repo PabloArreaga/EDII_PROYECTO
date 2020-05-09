@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace EDII_PROYECTO.Models
 {
-	public class Comp_Product : IComparable
+    public class Comp_Product : IComparable
     {
         public int _id { get; set; }
         public string _name { get; set; }
@@ -51,6 +49,6 @@ namespace EDII_PROYECTO.Models
             return startData;
         }
 
-        
+
     }
 }

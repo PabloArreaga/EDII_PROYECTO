@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using EDII_PROYECTO.ArbolB;
+using EDII_PROYECTO.Helpers;
+using EDII_PROYECTO.Huffman;
 using EDII_PROYECTO.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using static EDII_PROYECTO.Encrip.EncriptarSDES;
-using EDII_PROYECTO.Helpers;
-using EDII_PROYECTO.ArbolB;
+using System;
+using System.Collections.Generic;
 using System.IO;
-using EDII_PROYECTO.Huffman;
-using Newtonsoft.Json.Linq;
 
 namespace EDII_PROYECTO.Controllers
 {

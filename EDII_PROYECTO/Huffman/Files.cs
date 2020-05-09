@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace EDII_PROYECTO.Huffman
+﻿namespace EDII_PROYECTO.Huffman
 {
     public class Files
     {

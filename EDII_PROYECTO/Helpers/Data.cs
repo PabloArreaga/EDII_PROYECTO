@@ -1,14 +1,12 @@
-﻿using EDII_PROYECTO.Models;
+﻿using EDII_PROYECTO.Huffman;
+using EDII_PROYECTO.Models;
 using System;
 using System.Collections.Generic;
-using EDII_PROYECTO.Huffman;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace EDII_PROYECTO.Helpers
 {
-	public class Data
-	{
+    public class Data
+    {
         private static Data _instance = null;
         public static Data Instance
         {
