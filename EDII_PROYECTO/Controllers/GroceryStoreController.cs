@@ -253,6 +253,10 @@ namespace EDII_PROYECTO.Controllers
                 await stream.CopyToAsync(memory);
             }
             memory.Position = 0;
+            if (!Directory.Exists("TusArchivos"))
+            {
+                Directory.CreateDirectory("TusArchivos");
+            }
             Directory.Delete("TusArchivos", true);
             return File(memory, MediaTypeNames.Application.Octet, Path.GetFileName(path));
         }
