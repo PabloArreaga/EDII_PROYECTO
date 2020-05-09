@@ -1,4 +1,0 @@
-{
-     "_id" : 1,
-     "_name": "Coca-Cola",
-     "_price": 5

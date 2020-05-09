@@ -294,7 +294,8 @@ namespace EDII_PROYECTO.Controllers
         [HttpGet, Route("Download/{name}")]
         public async Task<FileStreamResult> FileDownload(string name)
         {
-            return await Download($"temp\\{name}.txt");
+            // mandas a llamar al metodo de compresion
+            return await Download($"TusArchivos\\{name}.txt");
         }
         async Task<FileStreamResult> Download(string path)
         {
@@ -304,7 +305,7 @@ namespace EDII_PROYECTO.Controllers
                 await stream.CopyToAsync(memory);
             }
             memory.Position = 0;
-            Directory.Delete("temp", true);
+            Directory.Delete("TusArchivos", true);
             return File(memory, MediaTypeNames.Application.Octet, Path.GetFileName(path));
         }
     }
