@@ -26,7 +26,6 @@ namespace EDII_PROYECTO.ArbolB
             Data.Instance.getNode = gNode;
             Data.Instance.getText = gText;
         }
-
         static int[] Header(int[] header = null)
         {
             var buffer = new byte[15];

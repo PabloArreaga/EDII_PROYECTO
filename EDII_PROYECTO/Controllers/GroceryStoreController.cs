@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 
 namespace EDII_PROYECTO.Controllers
 {
@@ -18,27 +19,29 @@ namespace EDII_PROYECTO.Controllers
 
     public class GroceryStoreController : ControllerBase
     {
+        public string nombreTree = "TreeProduct";
+        public string nombreTreeStore = "TreeStoreProduct";
+        public string nombreStore = "TreeStore";
         [Route("EnterProduct")]
         [HttpPost]
         public ActionResult<IEnumerable<string>> postProduct([FromForm]Comp_Product product)
         {
             if (product._name != null && product._price >= 0)
             {
-                BTree<Comp_Product>.Create("TreeProduct", new ConvertToObject(Comp_Product.ConvertToObject), new ConvertToString(Comp_Product.ConverttToString));
+                BTree<Comp_Product>.Create(nombreTree, new ConvertToObject(Comp_Product.ConvertToObject), new ConvertToString(Comp_Product.ConverttToString));
                 BTree<Comp_Product>.ValidateIncert(new Comp_Product { _id = BTree<Comp_Product>.KnowId(), _name = product._name, _price = product._price });
             }
             else
             {
                 return BadRequest("Solicitud erronea");
             }
-
             return Ok();
         }
         [Route("EnterProducts")]
         [HttpPost]
         public ActionResult<IEnumerable<string>> Inventory([FromForm]IFormFile file)
         {
-            BTree<Comp_Product>.Create("TreeProduct", new ConvertToObject(Comp_Product.ConvertToObject), new ConvertToString(Comp_Product.ConverttToString));
+            BTree<Comp_Product>.Create(nombreTree, new ConvertToObject(Comp_Product.ConvertToObject), new ConvertToString(Comp_Product.ConverttToString));
             Comp_Product.LoadInventory(file.OpenReadStream());
             return Ok();
         }
@@ -48,7 +51,7 @@ namespace EDII_PROYECTO.Controllers
         {
             if (store._name != null && store._address != null)
             {
-                BTree<Comp_Store>.Create("TreeStore", new ConvertToObject(Comp_Store.ConvertToObject), new ConvertToString(Comp_Store.ConvertToString));
+                BTree<Comp_Store>.Create(nombreStore, new ConvertToObject(Comp_Store.ConvertToObject), new ConvertToString(Comp_Store.ConvertToString));
                 BTree<Comp_Store>.ValidateIncert(new Comp_Store { _id = BTree<Comp_Store>.KnowId(), _name = store._name, _address = store._address });
             }
             else
@@ -63,7 +66,7 @@ namespace EDII_PROYECTO.Controllers
         {
             if (storeproduct._idStore >= 0 && storeproduct._idProduct >= 0 && storeproduct._stock >= 0)
             {
-                BTree<Comp_Store_Product>.Create("TreeStoreProduct", new ConvertToObject(Comp_Store_Product.ConvertToObject), new ConvertToString(Comp_Store_Product.ConvertToString));
+                BTree<Comp_Store_Product>.Create(nombreTreeStore, new ConvertToObject(Comp_Store_Product.ConvertToObject), new ConvertToString(Comp_Store_Product.ConvertToString));
                 BTree<Comp_Store_Product>.ValidateIncert(new Comp_Store_Product { _idStore = storeproduct._idStore, _idProduct = storeproduct._idProduct, _stock = storeproduct._stock });
             }
             else
@@ -74,31 +77,22 @@ namespace EDII_PROYECTO.Controllers
         }
         [Route("EXPORTAR")]
         [HttpPost]
-        public ActionResult PostHuffmanExportar(IFormFile File)
+        public ActionResult ExportarHuff([FromForm]string nombreArchivo)
         {
-            try
+            CompressHuffman HuffmanCompress = new CompressHuffman();
+            if (nombreArchivo == nombreTree || nombreArchivo == nombreTreeStore || nombreArchivo == nombreStore)
             {
-                var extensionTipo = Path.GetExtension(File.FileName);
-                var directorio = "TusArchivos/" + File.FileName;
-                CompressHuffman HuffmanCompress = new CompressHuffman();
-                if (extensionTipo == ".txt")//Para exportar
+                var rutaInicial = $"Database\\{nombreArchivo}.txt";
+                using (FileStream thisFile = new FileStream(rutaInicial, FileMode.OpenOrCreate))
                 {
-                    using (FileStream thisFile = new FileStream(directorio, FileMode.OpenOrCreate))
-                    {
-                        if (thisFile.Length == 0)
-                        {
-                            return BadRequest(new string[] { "Por favor guarde el archivo en: " + directorio });
-                        }
-                        HuffmanCompress.CompresionHuffman(thisFile);
-                    }
+                    HuffmanCompress.CompresionHuffman(thisFile);
                 }
-                else { return BadRequest(new string[] { "La extensión debe ser .txt" }); }
-                return Ok(new string[] { "Archivo comprimido exitosamente" });
             }
-            catch (System.NullReferenceException)//No se envia nada
+            else
             {
-                return NotFound(new string[] { "Porfavor seleccione un archivo" });
+                return BadRequest(new string[] { "Porfavor seleccione"});
             }
+            return Ok();
         }
         [Route("IMPORTAR")]
         [HttpPost]
