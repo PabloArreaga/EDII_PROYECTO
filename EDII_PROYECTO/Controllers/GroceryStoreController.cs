@@ -18,13 +18,13 @@ namespace EDII_PROYECTO.Controllers
 
     public class GroceryStoreController : ControllerBase
     {
-        [Route("Product")]
+        [Route("EnterProduct")]
         [HttpPost]
-        public ActionResult<IEnumerable<string>> postProduct([FromForm]Comp_Product product)//Datos principales para el nodo
+        public ActionResult<IEnumerable<string>> postProduct([FromForm]Comp_Product product)
         {
             if (product._name != null && product._price >= 0)
             {
-                BTree<Comp_Product>.Create("TreeProducts", new ConvertToObject(Comp_Product.ConvertToObject), new ConvertToString(Comp_Product.ConverttToString));
+                BTree<Comp_Product>.Create("TreeProduct", new ConvertToObject(Comp_Product.ConvertToObject), new ConvertToString(Comp_Product.ConverttToString));
                 BTree<Comp_Product>.ValidateIncert(new Comp_Product { _id = BTree<Comp_Product>.KnowId(), _name = product._name, _price = product._price });
             }
             else
@@ -32,20 +32,19 @@ namespace EDII_PROYECTO.Controllers
                 return BadRequest("Solicitud erronea");
             }
 
-            //Llamar nodo y crear arbol
             return Ok();
         }
-        [Route("UploadInventory")]
+        [Route("EnterProducts")]
         [HttpPost]
-        public ActionResult<IEnumerable<string>> Inventory([FromForm]IFormFile file)//Datos principales para el nodo
+        public ActionResult<IEnumerable<string>> Inventory([FromForm]IFormFile file)
         {
-            BTree<Comp_Product>.Create("TreeProducts", new ConvertToObject(Comp_Product.ConvertToObject), new ConvertToString(Comp_Product.ConverttToString));
+            BTree<Comp_Product>.Create("TreeProduct", new ConvertToObject(Comp_Product.ConvertToObject), new ConvertToString(Comp_Product.ConverttToString));
             Comp_Product.LoadInventory(file.OpenReadStream());
             return Ok();
         }
-        [Route("Store")]
+        [Route("EnterStore")]
         [HttpPost]
-        public ActionResult<IEnumerable<string>> postStore([FromForm]Comp_Store store)//Datos principales para el nodo
+        public ActionResult<IEnumerable<string>> postStore([FromForm]Comp_Store store)
         {
             if (store._name != null && store._address != null)
             {
@@ -56,20 +55,20 @@ namespace EDII_PROYECTO.Controllers
             {
                 return BadRequest("Solicitud erronea");
             }
-            //Llamar nodo y crear arbol
             return Ok();
         }
-        [Route("Product-Store")]
+        [Route("EnterProduct-Store")]
         [HttpPost]
-        public ActionResult postStoreProduct(Store_Product sp)
+        public ActionResult<IEnumerable<string>> postStoreProduct([FromForm]Comp_Store_Product storeproduct)
         {
-            if (sp.IdProduct > 0 && sp.IdProduct > 0 && sp.Stock >= 0)
+            if (storeproduct._idStore >= 0 && storeproduct._idProduct >= 0 && storeproduct._stock >= 0)
             {
-
+                BTree<Comp_Store_Product>.Create("TreeStoreProduct", new ConvertToObject(Comp_Store_Product.ConvertToObject), new ConvertToString(Comp_Store_Product.ConvertToString));
+                BTree<Comp_Store_Product>.ValidateIncert(new Comp_Store_Product { _idStore = storeproduct._idStore, _idProduct = storeproduct._idProduct, _stock = storeproduct._stock});
             }
             else
             {
-                return BadRequest(new string[] { "Solicitud erronea" });
+                return BadRequest("Solicitud erronea");
             }
             return Ok();
         }
@@ -186,5 +185,51 @@ namespace EDII_PROYECTO.Controllers
             public string TypeData { get; private set; }
             public string StringData { get; private set; }
         }
+
+        [Route("DisplayProduct")]
+        [HttpGet]
+        public List<Comp_Product> getProduct([FromForm]int product)
+        {
+            if (product >= 0)
+            {
+                BTree<Comp_Product>.Create("TreeProduct", new ConvertToObject(Comp_Product.ConvertToObject), new ConvertToString(Comp_Product.ConverttToString));
+            }
+            else
+            {
+                return null;
+            }
+            return BTree<Comp_Product>.Traversal(new Comp_Product { _id = product }, true);
+        }
+
+        [Route("DisplayStore")]
+        [HttpGet]
+        public List<Comp_Store> getStore([FromForm]int store)
+        {
+            if (store >= 0)
+            {
+                BTree<Comp_Store>.Create("TreeStore", new ConvertToObject(Comp_Store.ConvertToObject), new ConvertToString(Comp_Store.ConvertToString));
+            }
+            else
+            {
+                return null;
+            }
+            return BTree<Comp_Store>.Traversal(new Comp_Store { _id = store }, true);
+        }
+
+        [Route("DisplayStore-Product")]
+        [HttpGet]
+        public List<Comp_Store_Product> getStoreProduct([FromForm]int store, [FromForm] int product)
+        {
+            if (store >= 0 && product >= 0)
+            {
+                BTree<Comp_Store_Product>.Create("TreeStoreProduct", new ConvertToObject(Comp_Store.ConvertToObject), new ConvertToString(Comp_Store.ConvertToString));
+            }
+            else
+            {
+                return null;
+            }
+            return BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = store, _idProduct =product }, true);
+        }
+
     }
 }

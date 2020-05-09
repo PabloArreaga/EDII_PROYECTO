@@ -401,7 +401,7 @@ namespace EDII_PROYECTO.ArbolB
             return indexList;
         }
 
-        public static List<T> Traversal(T data, int option = 0)
+        public static List<T> Traversal(T data, bool option)
         {
             var auxTraversal = new List<T>();
             var header = Header();
@@ -411,14 +411,13 @@ namespace EDII_PROYECTO.ArbolB
                 var root = Node<T>.ConvertToNodo(header[1]);
                 var flagNest = true;
 
-                switch (option)
+                if (option)
                 {
-                    case 0:
-                        TraversalsIn(root);
-                        break;
-                    case 1:
-                        Search(root, data, ref flagNest);
-                        break;
+                    Search(root, data, ref flagNest);
+                }
+                else
+                {
+                    TraversalsIn(root);
                 }
             }
 
