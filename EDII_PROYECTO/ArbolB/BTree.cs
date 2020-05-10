@@ -4,6 +4,7 @@ using System.Linq;
 using EDII_PROYECTO.Helpers;
 using System.IO;
 using System.Text;
+using EDII_PROYECTO.Controllers;
 
 namespace EDII_PROYECTO.ArbolB
 {
@@ -26,6 +27,12 @@ namespace EDII_PROYECTO.ArbolB
             Data.Instance.getNode = gNode;
             Data.Instance.getText = gText;
         }
+
+        internal static void Create(object nombreStore, ToObject toObject, ToString toString)
+        {
+            throw new NotImplementedException();
+        }
+
         static int[] Header(int[] header = null)
         {
             var buffer = new byte[15];
