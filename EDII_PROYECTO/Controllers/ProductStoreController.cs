@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using EDII_PROYECTO.ArbolB;
+using EDII_PROYECTO.Encrip;
+using EDII_PROYECTO.Helpers;
 using EDII_PROYECTO.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,19 +14,29 @@ namespace EDII_PROYECTO.Controllers
         delegate string ToString(object obj);
         delegate object ToObject(string obj);
         delegate object Edit(object obj, string[] txt);
+        EncriptarSDES sDES = new EncriptarSDES();
+
+        public int claveUsuario = 1000; 
 
         public string nombreTreeStore = "TreeStoreProduct";
         [HttpPost]
         public ActionResult<IEnumerable<string>> postStoreProduct([FromForm]Comp_Store_Product storeproduct)
         {
-            if (storeproduct._idStore >= 0 && storeproduct._idProduct >= 0 && storeproduct._stock >= 0)
+            if (Data.Instance.ClavesParaLlave.Count == 0)
             {
-                BTree<Comp_Store_Product>.Create(nombreTreeStore, new ToObject(Comp_Store_Product.ConvertToObject), new ToString(Comp_Store_Product.ConvertToString));
-                BTree<Comp_Store_Product>.ValidateIncert(new Comp_Store_Product { _idStore = storeproduct._idStore, _idProduct = storeproduct._idProduct, _stock = storeproduct._stock });
+                sDES.ConvertirBinario(claveUsuario);
             }
             else
             {
-                return BadRequest("Solicitud erronea");
+                if (storeproduct._idStore >= 0 && storeproduct._idProduct >= 0 && storeproduct._stock >= 0)
+                {
+                    BTree<Comp_Store_Product>.Create(nombreTreeStore, new ToObject(Comp_Store_Product.ConvertToObject), new ToString(Comp_Store_Product.ConvertToString));
+                    BTree<Comp_Store_Product>.ValidateIncert(new Comp_Store_Product { _idStore = storeproduct._idStore, _idProduct = storeproduct._idProduct, _stock = storeproduct._stock });
+                }
+                else
+                {
+                    return BadRequest("Solicitud erronea");
+                }
             }
             return Ok();
         }
