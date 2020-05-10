@@ -37,14 +37,14 @@ namespace EDII_PROYECTO.Controllers
             {
                 return null;
             }
-            return BTree<Comp_Store>.Traversal(new Comp_Store { _id = store }, true);
+            return BTree<Comp_Store>.Traversal(new Comp_Store { _id = store }, 1);
         }
         [Route("DisplayShops")]//Buscar mejor obtención
         [HttpGet]
         public List<Comp_Store> getShops()
         {
             BTree<Comp_Store>.Create("TreeStore", new ToObject(Comp_Store.ConvertToObject), new ToString(Comp_Store.ConvertToString));
-            return BTree<Comp_Store>.Traversal(null, false);
+            return BTree<Comp_Store>.Traversal(null);
         }
     }
 }

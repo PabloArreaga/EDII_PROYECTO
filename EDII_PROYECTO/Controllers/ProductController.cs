@@ -40,14 +40,14 @@ namespace EDII_PROYECTO.Controllers
             {
                 return null;
             }
-            return BTree<Comp_Product>.Traversal(new Comp_Product { _id = product }, true);
+            return BTree<Comp_Product>.Traversal(new Comp_Product { _id = product }, 1);
         }
-        [HttpGet]//Varios productos
-        public List<Comp_Product> getProducts()
-        {
-            BTree<Comp_Product>.Create("TreeProduct", new ToObject(Comp_Store.ConvertToObject), new ToString(Comp_Store.ConvertToString));
-            return BTree<Comp_Product>.Traversal(null, false);
-        }
+        //[HttpGet]//Varios productos
+        //public List<Comp_Product> getProducts()
+        //{
+        //    BTree<Comp_Product>.Create("TreeProduct", new ToObject(Comp_Store.ConvertToObject), new ToString(Comp_Store.ConvertToString));
+        //    return BTree<Comp_Product>.Traversal(null, false);
+        //}
         [Route("All")]//Buscar mejor obtención
         [HttpPost]
         public ActionResult<IEnumerable<string>> Inventory([FromForm]IFormFile file)

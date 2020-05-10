@@ -10,6 +10,7 @@ namespace EDII_PROYECTO.ArbolB
 {
     public class BTree<T> where T : IComparable
     {
+        static List<T> auxTraversal = new List<T>();
         public static void Create(string nameFile, Delegate gNode, Delegate gText)
         {
             var grade = 7;
@@ -361,6 +362,7 @@ namespace EDII_PROYECTO.ArbolB
                 flagFirst = false;
             }
         }
+        
 
         static int Rotate(Node<T> father, int indexList, int[] header)
         {
@@ -407,9 +409,8 @@ namespace EDII_PROYECTO.ArbolB
             return indexList;
         }
 
-        public static List<T> Traversal(T data, bool option)
+        public static List<T> Traversal(T data, int option = 0)
         {
-            var auxTraversal = new List<T>();
             var header = Header();
             Data.Instance.grade = header[0];
             if (header[1] != 0)
@@ -417,20 +418,20 @@ namespace EDII_PROYECTO.ArbolB
                 var root = Node<T>.ConvertToNodo(header[1]);
                 var flagNest = true;
 
-                if (option)
+                switch (option)
                 {
-                    Search(root, data, ref flagNest);
-                }
-                else
-                {
-                    TraversalsIn(root);
+                    case 0:
+                        TraversalsIn(root);
+                        break;
+                    case 1:
+                        Search(root, data, ref flagNest);
+                        break;
                 }
             }
 
             return auxTraversal;
         }
 
-        static List<T> auxTraversal;
         static void TraversalsIn(Node<T> currentNode)
         {
             if (currentNode.children.Count == 0)
@@ -526,10 +527,7 @@ namespace EDII_PROYECTO.ArbolB
                 {
                     nodeAux.values.Add(item);
                 }
-                var lastValue = Data.Instance.key;
-                Data.Instance.key = valueNew;
                 nodeAux.ConvertNodetoString();
-                Data.Instance.key = lastValue;
             }
             else
             {
@@ -546,10 +544,7 @@ namespace EDII_PROYECTO.ArbolB
                         dataPosition++;
                     }
                 }
-                var lastValue = Data.Instance.key;
-                Data.Instance.key = valueNew;
                 nodeAux.ConvertNodetoString();
-                Data.Instance.key = lastValue;
             }
         }
         public static int KnowId()

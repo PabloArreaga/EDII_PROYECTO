@@ -51,14 +51,14 @@ namespace EDII_PROYECTO.Controllers
             {
                 return null;
             }
-            return BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = store, _idProduct = product }, true);
+            return BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = store, _idProduct = product }, 1);
         }
         [Route("DisplayStore-Products")]//Buscar mejor obtención
         [HttpGet]
         public List<Comp_Store_Product> getStoreProducts([FromForm]int store, [FromForm] int product)
         {
             BTree<Comp_Store_Product>.Create("TreeStoreProduct", new ToObject(Comp_Store.ConvertToObject), new ToString(Comp_Store.ConvertToString));
-            return BTree<Comp_Store_Product>.Traversal(null, false);
+            return BTree<Comp_Store_Product>.Traversal(null);
         }
     }
 }
