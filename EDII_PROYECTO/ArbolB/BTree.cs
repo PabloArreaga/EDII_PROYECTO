@@ -411,6 +411,7 @@ namespace EDII_PROYECTO.ArbolB
 
         public static List<T> Traversal(T data, int option = 0)
         {
+            auxTraversal.Clear();
             var header = Header();
             Data.Instance.grade = header[0];
             if (header[1] != 0)
@@ -429,6 +430,7 @@ namespace EDII_PROYECTO.ArbolB
                 }
             }
 
+            
             return auxTraversal;
         }
 
