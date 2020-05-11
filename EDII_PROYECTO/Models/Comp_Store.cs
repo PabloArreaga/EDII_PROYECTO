@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace EDII_PROYECTO.Models
 {
     public class Comp_Store : IComparable
     {
         public int _id { get; set; }
+        [Required]
         public string _name { get; set; }
+        [Required]
         public string _address { get; set; }
 
         public int CompareTo(object obj)

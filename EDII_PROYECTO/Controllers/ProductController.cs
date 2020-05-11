@@ -6,8 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EDII_PROYECTO.Controllers
 {
+    [Produces("text/plain")]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[Controller]")]
     public class ProductController : Controller
     {
         delegate string ToString(object obj);
@@ -15,6 +16,11 @@ namespace EDII_PROYECTO.Controllers
         delegate object Edit(object obj, string[] txt);
 
         public string nombreTree = "TreeProduct";
+        /// <summary>
+        /// Ingresar productos
+        /// </summary>
+        /// <response code="200">Productos ingresados correctamente</response>
+        /// <response code="404">Datos no compatibles</response>
         [HttpPost]
         public ActionResult<IEnumerable<string>> postProduct([FromForm]Comp_Product product)
         {
@@ -42,14 +48,22 @@ namespace EDII_PROYECTO.Controllers
         //    }
         //    return BTree<Comp_Product>.Traversal(new Comp_Product { _id = product }, 1);
         //}
-        [HttpGet]//Varios productos
+        /// <summary>
+        /// Obtiene un producto buscado
+        /// </summary>
+        /// <response code="200">Producto y respectivos valores</response>
+        [HttpGet]
         public List<Comp_Product> getProducts()
         {
             BTree<Comp_Product>.Create("TreeProduct", new ToObject(Comp_Product.ConvertToObject), new ToString(Comp_Product.ConverttToString));
             return BTree<Comp_Product>.Traversal(null);
         }
-        [Route("All")]//Buscar mejor obtención
-        [HttpPost]
+        /// <summary>
+        /// Obtención de productos totales
+        /// </summary>
+        /// <response code="200">Muestra de todos los productos dentro del sistema</response>
+        [Route("Display")]
+        [HttpGet]
         public ActionResult<IEnumerable<string>> Inventory([FromForm]IFormFile file)
         {
             BTree<Comp_Product>.Create(nombreTree, new ToObject(Comp_Product.ConvertToObject), new ToString(Comp_Product.ConverttToString));

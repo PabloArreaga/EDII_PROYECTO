@@ -7,8 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EDII_PROYECTO.Controllers
 {
+    [Produces("text/plain")]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[Controller]")]
     public class ProductStoreController : Controller
     {
         delegate string ToString(object obj);
@@ -19,6 +20,11 @@ namespace EDII_PROYECTO.Controllers
         public int claveUsuario = 1000; 
 
         public string nombreTreeStore = "TreeStoreProduct";
+        /// <summary>
+        /// Ingresar productos
+        /// </summary>
+        /// <response code="200">Productos ingresados correctamente</response>
+        /// <response code="404">Datos no compatibles</response>
         [HttpPost]
         public ActionResult<IEnumerable<string>> postStoreProduct([FromForm]Comp_Store_Product storeproduct)
         {
@@ -40,6 +46,10 @@ namespace EDII_PROYECTO.Controllers
             }
             return Ok();
         }
+        /// <summary>
+        /// Obtiene un producto buscado
+        /// </summary>
+        /// <response code="200">Producto y respectivos valores</response>
         [HttpGet]
         public List<Comp_Store_Product> getStoreProduct([FromForm]int store, [FromForm] int product)
         {
@@ -53,7 +63,11 @@ namespace EDII_PROYECTO.Controllers
             }
             return BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = store, _idProduct = product }, 1);
         }
-        [Route("DisplayStore-Products")]//Buscar mejor obtención
+        /// <summary>
+        /// Obtención de productos totales
+        /// </summary>
+        /// <response code="200">Muestra de todos los productos dentro del sistema</response>
+        [Route("Display")]
         [HttpGet]
         public List<Comp_Store_Product> getStoreProducts([FromForm]int store, [FromForm] int product)
         {

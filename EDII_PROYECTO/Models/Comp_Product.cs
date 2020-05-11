@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using EDII_PROYECTO.ArbolB;
 
@@ -8,7 +9,9 @@ namespace EDII_PROYECTO.Models
     public class Comp_Product : IComparable
     {
         public int _id { get; set; }
+        [Required]
         public string _name { get; set; }
+        [Required]
         public double _price { get; set; }
 
         public int CompareTo(object obj)

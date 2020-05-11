@@ -1,14 +1,4 @@
-﻿using EDII_PROYECTO.ArbolB;
-using EDII_PROYECTO.Huffman;
-using EDII_PROYECTO.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Net.Mime;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace EDII_PROYECTO.Controllers
 {

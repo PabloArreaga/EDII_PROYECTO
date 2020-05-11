@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace EDII_PROYECTO.Models
 {
     public class Comp_Store_Product : IComparable
     {
         //_id = _idStore-_idProduct 
+        [Required]
         public int _idStore { get; set; }
+        [Required]
         public int _idProduct { get; set; }
+        [Required]
         public int _stock { get; set; }
 
         public int CompareTo(object obj)

@@ -1,35 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Mime;
+﻿using System.IO;
 using System.Threading.Tasks;
 using EDII_PROYECTO.Helpers;
 using EDII_PROYECTO.Huffman;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EDII_PROYECTO.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class ExportImportController : Controller
     {
-        [Route("EXPORTAR")]
-        [HttpPost]
+        /// <summary>
+        /// Permite la descarga de una base de datos comprimida con extensión .huff
+        /// </summary>
+        /// <returns>Archivo con extensión .huff para poder utilizar en otra base de datos</returns>
+        /// <response code="200">Archivo comprimido exitosamente</response>  
+        /// <response code="400">Nombre no coincide con archivos en la base de datos</response>  
+        /// <response code="404">Archivo no existente</response>
+        [HttpPost, Route("EXPORTAR")]
         public async Task<IActionResult> ExportarHuff([FromForm]string nombreArchivo)
         {
             CompressHuffman HuffmanCompress = new CompressHuffman();
             if (nombreArchivo == "TreeStoreProduct" || nombreArchivo == "TreeProduct" || nombreArchivo == "TreeStore")
             {
                 var rutaInicial = $"Database\\{nombreArchivo}.txt";
-                using (FileStream thisFile = new FileStream(rutaInicial, FileMode.OpenOrCreate))
+                if (Directory.Exists(rutaInicial))
                 {
-                    HuffmanCompress.CompresionHuffman(thisFile);
+                    using (FileStream thisFile = new FileStream(rutaInicial, FileMode.OpenOrCreate))
+                    {
+                        HuffmanCompress.CompresionHuffman(thisFile);
+                    }
+                }
+                else
+                {
+                    return NotFound(new string[] { nombreArchivo + " no se encuentra en la base de datos" });
                 }
             }
             else
             {
-                return BadRequest(new string[] { "Porfavor seleccione: " });
+                return BadRequest(new string[] { "Porfavor seleccione: TreeStoreProduct, TreeProduct, TreeStore" });
             }
             //Compresión y Descarga
             using (var thisFile = new FileStream($"Database\\{nombreArchivo}.txt", FileMode.Open))
@@ -43,8 +52,12 @@ namespace EDII_PROYECTO.Controllers
             }
             return File(await System.IO.File.ReadAllBytesAsync(ruta), "application/octet-stream", nombreArchivo + ".huff");
         }
-        [Route("IMPORTAR")]
-        [HttpPost]
+        /// <summary>
+        /// Todos los documentos con extención .huff serán importados a la base de datos
+        /// </summary>
+        /// <response code="200">Archivos compatibles descomprimidos y copiados a la base de datos</response>
+        /// <response code="404">Carpeta **TusArchivos** no contiene archivos compatibles</response>
+        [HttpPost, Route("IMPORTAR")]
         public ActionResult PostHuffmanImportar()
         {
             var nombreRuta = "TusArchivos";
@@ -64,7 +77,7 @@ namespace EDII_PROYECTO.Controllers
                 {
                     if (thisFile.Length == 0)
                     {
-                        return BadRequest(new string[] { "Archivo no contiene elementos"  });
+                        return BadRequest(new string[] { "Archivo no contiene elementos" });
                     }
                     var file = archivo.Replace(".huff", string.Empty);
                     file = file.Replace("TusArchivos\\", string.Empty);

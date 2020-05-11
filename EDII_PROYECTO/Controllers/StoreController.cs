@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EDII_PROYECTO.Controllers
 {
+    [Produces("text/plain")]
+    [ApiController]
+    [Route("[Controller]")]
     public class StoreController : Controller
     {
         delegate string ToString(object obj);
@@ -12,6 +15,11 @@ namespace EDII_PROYECTO.Controllers
         delegate object Edit(object obj, string[] txt);
 
         public string nombreStore = "TreeStore";
+        /// <summary>
+        /// Ingresar productos
+        /// </summary>
+        /// <response code="200">Productos ingresados correctamente</response>
+        /// <response code="404">Datos no compatibles</response>
         [HttpPost]
         public ActionResult<IEnumerable<string>> postStore([FromForm]Comp_Store store)
         {
@@ -26,6 +34,10 @@ namespace EDII_PROYECTO.Controllers
             }
             return Ok();
         }
+        /// <summary>
+        /// Obtiene un producto buscado
+        /// </summary>
+        /// <response code="200">Producto y respectivos valores</response>
         [HttpGet]
         public List<Comp_Store> getStore([FromForm]int store)
         {
@@ -39,7 +51,11 @@ namespace EDII_PROYECTO.Controllers
             }
             return BTree<Comp_Store>.Traversal(new Comp_Store { _id = store }, 1);
         }
-        [Route("DisplayShops")]//Buscar mejor obtención
+        /// <summary>
+        /// Obtención de productos totales
+        /// </summary>
+        /// <response code="200">Muestra de todos los productos dentro del sistema</response>
+        [Route("Display")]
         [HttpGet]
         public List<Comp_Store> getShops()
         {
