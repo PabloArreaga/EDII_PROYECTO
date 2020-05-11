@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Mime;
 using System.Threading.Tasks;
+using EDII_PROYECTO.Helpers;
 using EDII_PROYECTO.Huffman;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -42,38 +43,37 @@ namespace EDII_PROYECTO.Controllers
             }
             return File(await System.IO.File.ReadAllBytesAsync(ruta), "application/octet-stream", nombreArchivo + ".huff");
         }
-        //public async Task<IActionResult> FileDownload(string name)
-        //{
-
-        //}
         [Route("IMPORTAR")]
         [HttpPost]
-        public ActionResult PostHuffmanImportar(string File)
+        public ActionResult PostHuffmanImportar()
         {
-            try
+            var nombreRuta = "TusArchivos";
+            if (!Directory.Exists(nombreRuta))
             {
-                if (!Directory.Exists("TusArchivos"))
-                {
-                    Directory.CreateDirectory("TusArchivos");
-                }
-                var directorio = "TusArchivos/" + File;
+                Directory.CreateDirectory(nombreRuta);
+            }
+            string[] ruta = Directory.GetFiles(nombreRuta, "*.huff");
+            if (ruta.Length == 0)
+            {
+                return BadRequest(new string[] { "Por favor guarde el archivo en: " + nombreRuta });
+            }
+            foreach (var archivo in ruta)
+            {
                 CompressHuffman HuffmanCompress = new CompressHuffman();
-                using (FileStream thisFile = new FileStream("TusArchivos/" + File, FileMode.OpenOrCreate))
+                using (FileStream thisFile = new FileStream(archivo, FileMode.OpenOrCreate))
                 {
                     if (thisFile.Length == 0)
                     {
-                        return BadRequest(new string[] { "Por favor guarde el archivo en: " + directorio });
+                        return BadRequest(new string[] { "Archivo no contiene elementos"  });
                     }
+                    var file = archivo.Replace(".huff", string.Empty);
+                    file = file.Replace("TusArchivos\\", string.Empty);
+                    Data.Instance.adress = $"Database\\{file}.txt";
+                    thisFile.Close();
                     HuffmanCompress.DescompresionHuffman(thisFile);
                 }
-
-                return Ok(new string[] { "Datos guardados" });
             }
-            catch (Exception)
-            {
-
-                return NotFound(new string[] { "Porfavor seleccione un archivo" });
-            }
+            return Ok(new string[] { "Datos guardados" });
         }
     }
 }
