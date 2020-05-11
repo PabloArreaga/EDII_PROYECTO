@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
 
 namespace EDII_PROYECTO
 {
@@ -20,31 +19,35 @@ namespace EDII_PROYECTO
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Version = "v1",
-                    Title = "Estructura de Datos II",
-                    Description = "Proyecto"
-                });
+            services.AddSwaggerDocument();
 
-            });
+            //services.AddSwaggerGen(c =>
+            //{
+            //    c.SwaggerDoc("v1", new OpenApiInfo
+            //    {
+            //        Version = "v1",
+            //        Title = "Estructura de Datos II",
+            //        Description = "Proyecto"
+            //    });
+
+            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseSwagger();
-            app.UseSwaggerUI(c=> {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Proyecto de Estructura de Datos II");
-                c.RoutePrefix = string.Empty;
-            });
+            //app.UseSwaggerUI(c=> {
+            //    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Proyecto de Estructura de Datos II");
+            //    c.RoutePrefix = string.Empty;
+            //});
 
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseSwagger();
+            app.UseSwaggerUi3();
 
             app.UseHttpsRedirection();
 
