@@ -15,7 +15,7 @@ namespace EDII_PROYECTO.Controllers
     {
         [Route("EXPORTAR")]
         [HttpPost]
-        public ActionResult ExportarHuff([FromForm]string nombreArchivo)
+        public async Task<IActionResult> ExportarHuff([FromForm]string nombreArchivo)
         {
             CompressHuffman HuffmanCompress = new CompressHuffman();
             if (nombreArchivo == "TreeStoreProduct" || nombreArchivo == "TreeProduct" || nombreArchivo == "TreeStore")
@@ -30,20 +30,35 @@ namespace EDII_PROYECTO.Controllers
             {
                 return BadRequest(new string[] { "Porfavor seleccione: " });
             }
-            var archivoResultado = FileDownload(nombreArchivo);
-            return Ok();
+            //Compresión y Descarga
+            using (var thisFile = new FileStream($"Database\\{nombreArchivo}.txt", FileMode.Open))
+            {
+                HuffmanCompress.CompresionHuffman(thisFile);
+            }
+            var ruta = $"Database/{nombreArchivo}" + ".huff";
+            if (!System.IO.File.Exists(ruta))
+            {
+                return BadRequest();
+            }
+            return File(await System.IO.File.ReadAllBytesAsync(ruta), "application/octet-stream", nombreArchivo + ".huff");
         }
-        [Route("IMPORTAR/{name}")]
+        //public async Task<IActionResult> FileDownload(string name)
+        //{
+
+        //}
+        [Route("IMPORTAR")]
         [HttpPost]
-        public ActionResult PostHuffmanImportar(IFormFile File)
+        public ActionResult PostHuffmanImportar(string File)
         {
             try
             {
-                var extensionTipo = Path.GetExtension(File.FileName);
-                var directorio = "TusArchivos/" + File.FileName;
+                if (!Directory.Exists("TusArchivos"))
+                {
+                    Directory.CreateDirectory("TusArchivos");
+                }
+                var directorio = "TusArchivos/" + File;
                 CompressHuffman HuffmanCompress = new CompressHuffman();
-                var listaNodo = new List<AllData>();
-                using (FileStream thisFile = new FileStream("TusArchivos/" + File.FileName, FileMode.OpenOrCreate))
+                using (FileStream thisFile = new FileStream("TusArchivos/" + File, FileMode.OpenOrCreate))
                 {
                     if (thisFile.Length == 0)
                     {
@@ -51,6 +66,7 @@ namespace EDII_PROYECTO.Controllers
                     }
                     HuffmanCompress.DescompresionHuffman(thisFile);
                 }
+
                 return Ok(new string[] { "Datos guardados" });
             }
             catch (Exception)
@@ -58,40 +74,6 @@ namespace EDII_PROYECTO.Controllers
 
                 return NotFound(new string[] { "Porfavor seleccione un archivo" });
             }
-        }
-        public async Task<FileStreamResult> FileDownload(string name)
-        {
-            using (var thisFile = new FileStream($"Database\\{name}.txt", FileMode.Open))
-            {
-                CompressHuffman HuffmanCompress = new CompressHuffman();
-                HuffmanCompress.CompresionHuffman(thisFile);
-            }
-            return await Download($"Database\\{name}.huff");
-        }
-        async Task<FileStreamResult> Download(string path)
-        {
-            var memory = new MemoryStream();
-            using (var stream = new FileStream(path, FileMode.Open))
-            {
-                await stream.CopyToAsync(memory);
-            }
-            memory.Position = 0;
-            if (!Directory.Exists("TusArchivos"))
-            {
-                Directory.CreateDirectory("TusArchivos");
-            }
-            Directory.Delete("TusArchivos", true);
-            return File(memory, MediaTypeNames.Application.Octet, Path.GetFileName(path));
-        }
-        public struct AllData
-        {
-            public AllData(string strdata, string strValue)
-            {
-                TypeData = strdata;
-                StringData = strValue;
-            }
-            public string TypeData { get; private set; }
-            public string StringData { get; private set; }
         }
     }
 }
