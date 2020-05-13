@@ -106,8 +106,8 @@ namespace EDII_PROYECTO.Controllers
 		public ActionResult<List<List<Comp_Store_Product>>> putTransferStoreProduct(int product, int transmitter, int receiver, int stock)
 		{
 			BTree<Comp_Store_Product>.Create(treeFile, new ToObject(Comp_Store_Product.ConvertToObject), new ToString(Comp_Store_Product.ConvertToString));
-			var nodoTransmiter = BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = transmitter, _idProduct = product }, 1);
-			var nodoReceiver = BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = receiver, _idProduct = product }, 1);
+			var nodoTransmiter =  new List<Comp_Store_Product>( BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idProduct = product, _idStore = transmitter }, 1) );
+			var nodoReceiver = new List<Comp_Store_Product>(BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idProduct = product, _idStore = receiver }, 1));
 
 			if (nodoTransmiter.Count != 0 && nodoTransmiter[0]._stock - stock >= 0)
 			{
@@ -118,10 +118,10 @@ namespace EDII_PROYECTO.Controllers
 				else
 				{
 					nodoReceiver[0]._stock = nodoReceiver[0]._stock + stock;
-					BTree<Comp_Store_Product>.ValidateEdit(nodoReceiver[0], new string[2] { nodoReceiver[0]._stock.ToString(), string.Empty }, new Edit(Comp_Store_Product.Modify));
+					BTree<Comp_Store_Product>.ValidateEdit(nodoReceiver[0], new string[2] { nodoReceiver[0]._stock.ToString(), null }, new Edit(Comp_Store_Product.Modify));
 				}
 				nodoTransmiter[0]._stock = nodoTransmiter[0]._stock - stock;
-				BTree<Comp_Store_Product>.ValidateEdit(nodoTransmiter[0], new string[2] { nodoTransmiter[0]._stock.ToString(), string.Empty }, new Edit(Comp_Store_Product.Modify));
+				BTree<Comp_Store_Product>.ValidateEdit(nodoTransmiter[0], new string[2] { nodoTransmiter[0]._stock.ToString(), null }, new Edit(Comp_Store_Product.Modify));
 			}
 			else
 			{
@@ -129,8 +129,8 @@ namespace EDII_PROYECTO.Controllers
 			}
 
 			var nodoList = new List<List<Comp_Store_Product>>();
-			nodoList.Add(BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = transmitter, _idProduct = product }, 1));
-			nodoList.Add(BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = receiver, _idProduct = product }, 1));
+			nodoList.Add(new List<Comp_Store_Product>(BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = transmitter, _idProduct = product }, 1)));
+			nodoList.Add(new List<Comp_Store_Product>(BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = receiver, _idProduct = product }, 1)));
 			return Ok(nodoList);
 
 		}
