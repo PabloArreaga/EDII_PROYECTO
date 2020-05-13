@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EDII_PROYECTO.Controllers
 {
-    //[Produces("text/plain")]
     [ApiController]
     [Route("[Controller]")]
     public class ProductStoreController : Controller
@@ -16,12 +15,38 @@ namespace EDII_PROYECTO.Controllers
         delegate object ToObject(string obj);
         delegate object Edit(object obj, string[] txt);
         EncriptarSDES sDES = new EncriptarSDES();
-
         public int claveUsuario = 1000; 
-
         public string treeFile = "TreeStoreProduct";
+
         /// <summary>
-        /// Ingresar productos
+        /// Obtiene un Producto/Tienda buscado
+        /// </summary>
+        /// <response code="200">Producto y respectivos valores</response>
+        [HttpGet, Route("Product_Store")]
+        public List<Comp_Store_Product> getStoreProduct([FromForm]int store, [FromForm] int product)
+        {
+            if (store >= 0 && product >= 0)
+            {
+                BTree<Comp_Store_Product>.Create(treeFile, new ToObject(Comp_Store_Product.ConvertToObject), new ToString(Comp_Store_Product.ConvertToString));
+            }
+            else
+            {
+                return null;
+            }
+            return BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = store, _idProduct = product }, 1);
+        }
+        /// <summary>
+        /// Obtención de Productos/Tiendas totales
+        /// </summary>
+        /// <response code="200">Muestra de todos los productos dentro del sistema</response>
+        [HttpGet, Route("Display")]
+        public List<Comp_Store_Product> getStoreProducts()
+        {
+            BTree<Comp_Store_Product>.Create(treeFile, new ToObject(Comp_Store_Product.ConvertToObject), new ToString(Comp_Store_Product.ConvertToString));
+            return BTree<Comp_Store_Product>.Traversal(null);
+        }
+        /// <summary>
+        /// Ingresar Productos/Tienda
         /// </summary>
         /// <response code="200">Productos ingresados correctamente</response>
         /// <response code="404">Datos no compatibles</response>
@@ -47,35 +72,9 @@ namespace EDII_PROYECTO.Controllers
             return Ok();
         }
         /// <summary>
-        /// Obtiene un producto buscado
+        /// Modificación de datos
         /// </summary>
-        /// <response code="200">Producto y respectivos valores</response>
-        [HttpGet]
-        public List<Comp_Store_Product> getStoreProduct([FromForm]int store, [FromForm] int product)
-        {
-            if (store >= 0 && product >= 0)
-            {
-                BTree<Comp_Store_Product>.Create(treeFile, new ToObject(Comp_Store_Product.ConvertToObject), new ToString(Comp_Store_Product.ConvertToString));
-            }
-            else
-            {
-                return null;
-            }
-            return BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = store, _idProduct = product }, 1);
-        }
-        /// <summary>
-        /// Obtención de productos totales
-        /// </summary>
-        /// <response code="200">Muestra de todos los productos dentro del sistema</response>
-        [Route("All")]
-        [HttpGet]
-        public List<Comp_Store_Product> getStoreProducts()
-        {
-            BTree<Comp_Store_Product>.Create(treeFile, new ToObject(Comp_Store_Product.ConvertToObject), new ToString(Comp_Store_Product.ConvertToString));
-            return BTree<Comp_Store_Product>.Traversal(null);
-        }
-
-        [HttpPut] // modifica los datos
+        [HttpPut, Route("Modify")]
         public ActionResult<IEnumerable<string>> putStoreProduct([FromForm]Comp_Store_Product storeProduct)
         {
             BTree<Comp_Store_Product>.Create(treeFile, new ToObject(Comp_Store_Product.ConvertToObject), new ToString(Comp_Store_Product.ConvertToString));
@@ -87,15 +86,15 @@ namespace EDII_PROYECTO.Controllers
             BTree<Comp_Store_Product>.ValidateEdit(storeProduct, new string[2] { storeProduct._stock.ToString(), null }, new Edit(Comp_Store_Product.Modify));
             return Ok("El elemento fue actualizado");
         }
-
-        [Route("Transfer")]
-        [HttpPut]
+        /// <summary>
+        /// Transferencia de datos
+        /// </summary>
+        [HttpPut, Route("Transfer")]
         public List<List<Comp_Store_Product>> putTransferStoreProduct([FromForm]int product, [FromForm] int transmitter, [FromForm]int receiver, [FromForm] int stock)
         {
             BTree<Comp_Store_Product>.Create(treeFile, new ToObject(Comp_Store.ConvertToObject), new ToString(Comp_Store.ConvertToString));
             var nodoTransmiter = BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = transmitter, _idProduct = product }, 1);
             var nodoReceiver = BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = receiver, _idProduct = product }, 1);
-
             if (nodoTransmiter.Count != 0 && nodoTransmiter[0]._stock - stock >= 0)
             {
                 if (nodoReceiver.Count == 0)
@@ -114,12 +113,10 @@ namespace EDII_PROYECTO.Controllers
             {
                 return null;
             }
-
             var nodoList = new List<List<Comp_Store_Product>>();
             nodoList.Add(BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = transmitter, _idProduct = product }, 1));
             nodoList.Add(BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = receiver, _idProduct = product }, 1));
             return nodoList;
-
         }
     }
 }

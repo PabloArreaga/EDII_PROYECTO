@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EDII_PROYECTO.Controllers
 {
-    //[Produces("text/plain")]
     [ApiController]
     [Route("[Controller]")]
     public class StoreController : Controller
@@ -13,8 +12,35 @@ namespace EDII_PROYECTO.Controllers
         delegate string ToString(object obj);
         delegate object ToObject(string obj);
         delegate object Edit(object obj, string[] txt);
-
         public string treeFile = "TreeStore";
+
+        /// <summary>
+        /// Obtiene un producto buscado
+        /// </summary>
+        /// <response code="200">Producto y respectivos valores</response>
+        [HttpGet, Route("Find")]
+        public List<Comp_Store> getStore([FromForm]int store)
+        {
+            if (store >= 0)
+            {
+                BTree<Comp_Store>.Create("TreeStore", new ToObject(Comp_Store.ConvertToObject), new ToString(Comp_Store.ConvertToString));
+            }
+            else
+            {
+                return null;
+            }
+            return BTree<Comp_Store>.Traversal(new Comp_Store { _id = store }, 1);
+        }
+        /// <summary>
+        /// Obtención de tiendas totales
+        /// </summary>
+        /// <response code="200">Muestra de todos los productos dentro del sistema</response>
+        [HttpGet, Route("Display")]
+        public List<Comp_Store> getShops()
+        {
+            BTree<Comp_Store>.Create("TreeStore", new ToObject(Comp_Store.ConvertToObject), new ToString(Comp_Store.ConvertToString));
+            return BTree<Comp_Store>.Traversal(null);
+        }
         /// <summary>
         /// Ingresar productos
         /// </summary>
@@ -35,35 +61,9 @@ namespace EDII_PROYECTO.Controllers
             return Ok();
         }
         /// <summary>
-        /// Obtiene un producto buscado
+        /// Modificación de datos
         /// </summary>
-        /// <response code="200">Producto y respectivos valores</response>
-        [HttpGet]
-        public List<Comp_Store> getStore([FromForm]int store)
-        {
-            if (store >= 0)
-            {
-                BTree<Comp_Store>.Create("TreeStore", new ToObject(Comp_Store.ConvertToObject), new ToString(Comp_Store.ConvertToString));
-            }
-            else
-            {
-                return null;
-            }
-            return BTree<Comp_Store>.Traversal(new Comp_Store { _id = store }, 1);
-        }
-        /// <summary>
-        /// Obtención de productos totales
-        /// </summary>
-        /// <response code="200">Muestra de todos los productos dentro del sistema</response>
-        [Route("All")]
-        [HttpGet]
-        public List<Comp_Store> getShops()
-        {
-            BTree<Comp_Store>.Create("TreeStore", new ToObject(Comp_Store.ConvertToObject), new ToString(Comp_Store.ConvertToString));
-            return BTree<Comp_Store>.Traversal(null);
-        }
-
-        [HttpPut] // modifica los datos
+        [HttpPut]
         public ActionResult<IEnumerable<string>> putProduct([FromForm]Comp_Store store)
         {
             BTree<Comp_Store>.Create(treeFile, new ToObject(Comp_Store.ConvertToObject), new ToString(Comp_Store.ConvertToString));
