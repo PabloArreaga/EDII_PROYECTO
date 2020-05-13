@@ -18,13 +18,13 @@ namespace EDII_PROYECTO.Controllers
         /// <response code="400">Nombre no coincide con archivos en la base de datos</response>  
         /// <response code="404">Archivo no existente</response>
         [HttpPost, Route("EXPORTAR")]
-        public async Task<IActionResult> ExportarHuff([FromForm]string nombreArchivo)
+        public async Task<IActionResult> ExportarHuff(string nombreArchivo)
         {
             CompressHuffman HuffmanCompress = new CompressHuffman();
             if (nombreArchivo == "TreeStoreProduct" || nombreArchivo == "TreeProduct" || nombreArchivo == "TreeStore")
             {
                 var rutaInicial = $"Database\\{nombreArchivo}.txt";
-                if (Directory.Exists(rutaInicial))
+                if (Directory.Exists("Database"))
                 {
                     using (FileStream thisFile = new FileStream(rutaInicial, FileMode.OpenOrCreate))
                     {
