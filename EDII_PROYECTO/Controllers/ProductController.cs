@@ -19,7 +19,7 @@ namespace EDII_PROYECTO.Controllers
         /// Busqueda de producto por ID
         /// </summary>
         [HttpGet, Route("Individual")]
-        public List<Comp_Product> getProduct([FromForm]int product)
+        public ActionResult<List<Comp_Product>> getProduct(int product)
         {
             if (product >= 0)
             {
@@ -27,19 +27,19 @@ namespace EDII_PROYECTO.Controllers
             }
             else
             {
-                return null;
+                return BadRequest(null);
             }
-            return BTree<Comp_Product>.Traversal(new Comp_Product { _id = product }, 1);
+            return Ok(BTree<Comp_Product>.Traversal(new Comp_Product { _id = product }, 1)) ;
         }
         /// <summary>
         /// Obtiene los productos ingresados
         /// </summary>
         /// <response code="200">Producto y respectivos valores</response>
         [HttpGet, Route("Display")]
-        public List<Comp_Product> getProducts()
+        public ActionResult<List<Comp_Product>> getProducts()
         {
             BTree<Comp_Product>.Create(treeFile, new ToObject(Comp_Product.ConvertToObject), new ToString(Comp_Product.ConverttToString));
-            return BTree<Comp_Product>.Traversal(null);
+            return Ok(BTree<Comp_Product>.Traversal(null)) ;
         }
         /// <summary>
         /// Ingresar productos
@@ -61,11 +61,12 @@ namespace EDII_PROYECTO.Controllers
             return Ok("Dato ingresado correctamente");
         }
         /// <summary>
-        /// Obtención de productos totales
+        /// Ingresa varios productos mediante archivo csv
         /// </summary>
         /// <response code="200">Muestra de todos los productos dentro del sistema</response>
+        /// <response code="400">Archivo no valido</response>
         [HttpPost, Route("Inventory")]
-        public ActionResult<IEnumerable<string>> Inventory([FromForm]IFormFile file)
+        public ActionResult<IEnumerable<string>> Inventory(IFormFile file)
         {
             if (file == null || file.Length == 0)
             {
@@ -73,7 +74,7 @@ namespace EDII_PROYECTO.Controllers
             }
             BTree<Comp_Product>.Create(treeFile, new ToObject(Comp_Product.ConvertToObject), new ToString(Comp_Product.ConverttToString));
             Comp_Product.LoadInventory(file.OpenReadStream());
-            return Ok("Se han ingresado los valores con excito");
+            return Ok("Se han ingresado los valores con exito");
         }
         /// <summary>
         /// Modificación de datos

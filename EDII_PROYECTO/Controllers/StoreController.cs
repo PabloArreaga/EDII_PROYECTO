@@ -19,7 +19,7 @@ namespace EDII_PROYECTO.Controllers
         /// </summary>
         /// <response code="200">Producto y respectivos valores</response>
         [HttpGet, Route("Find")]
-        public List<Comp_Store> getStore([FromForm]int store)
+        public ActionResult<List<Comp_Store>> getStore(int store)
         {
             if (store >= 0)
             {
@@ -27,19 +27,19 @@ namespace EDII_PROYECTO.Controllers
             }
             else
             {
-                return null;
+                return BadRequest();
             }
-            return BTree<Comp_Store>.Traversal(new Comp_Store { _id = store }, 1);
+            return Ok(BTree<Comp_Store>.Traversal(new Comp_Store { _id = store }, 1)) ;
         }
         /// <summary>
         /// Obtención de tiendas totales
         /// </summary>
         /// <response code="200">Muestra de todos los productos dentro del sistema</response>
         [HttpGet, Route("Display")]
-        public List<Comp_Store> getShops()
+        public ActionResult<List<Comp_Store>> getShops()
         {
             BTree<Comp_Store>.Create("TreeStore", new ToObject(Comp_Store.ConvertToObject), new ToString(Comp_Store.ConvertToString));
-            return BTree<Comp_Store>.Traversal(null);
+            return Ok(BTree<Comp_Store>.Traversal(null)) ;
         }
         /// <summary>
         /// Ingresar productos
