@@ -20,14 +20,13 @@ namespace EDII_PROYECTO.Controllers
         [HttpPost, Route("EXPORTAR")]
         public async Task<IActionResult> ExportarHuff(string nombreArchivo)
         {
-            CompressHuffman HuffmanCompress = new CompressHuffman();
             if (nombreArchivo == "TreeStoreProduct" || nombreArchivo == "TreeProduct" || nombreArchivo == "TreeStore")
             {
-                var rutaInicial = $"Database\\{nombreArchivo}.txt";
                 if (Directory.Exists("Database"))
                 {
-                    using (FileStream thisFile = new FileStream(rutaInicial, FileMode.OpenOrCreate))
+                    using (FileStream thisFile = new FileStream($"Database\\{nombreArchivo}.txt", FileMode.OpenOrCreate))
                     {
+                        CompressHuffman HuffmanCompress = new CompressHuffman();
                         HuffmanCompress.CompresionHuffman(thisFile);
                     }
                 }
@@ -40,16 +39,8 @@ namespace EDII_PROYECTO.Controllers
             {
                 return BadRequest(new string[] { "Porfavor seleccione: TreeStoreProduct, TreeProduct, TreeStore" });
             }
-            //Compresión y Descarga
-            using (var thisFile = new FileStream($"Database\\{nombreArchivo}.txt", FileMode.Open))
-            {
-                HuffmanCompress.CompresionHuffman(thisFile);
-            }
-            var ruta = $"Database/{nombreArchivo}" + ".huff";
-            if (!System.IO.File.Exists(ruta))
-            {
-                return BadRequest();
-            }
+            //Descarga
+            var ruta = $"TusArchivos/{nombreArchivo}" + ".huff";
             return File(await System.IO.File.ReadAllBytesAsync(ruta), "application/octet-stream", nombreArchivo + ".huff");
         }
         /// <summary>

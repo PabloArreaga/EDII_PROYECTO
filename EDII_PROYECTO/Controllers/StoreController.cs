@@ -13,38 +13,44 @@ namespace EDII_PROYECTO.Controllers
         delegate object ToObject(string obj);
         delegate object Edit(object obj, string[] txt);
         public string treeFile = "TreeStore";
-
         /// <summary>
-        /// Obtiene un producto buscado
+        /// Obtiene una tienda buscada
         /// </summary>
-        /// <response code="200">Producto y respectivos valores</response>
-        [HttpGet, Route("Find")]
-        public ActionResult<List<Comp_Store>> getStore(int store)
+        /// <response code="200">Muestra de tienda y respectivos valores</response>
+        /// <response code="404">No se encuentran valores con ID seleccionado</response>
+        [HttpGet]
+        public ActionResult<List<Comp_Store>> getStore(int id)
         {
-            if (store >= 0)
+            if (id >= 0)
             {
                 BTree<Comp_Store>.Create("TreeStore", new ToObject(Comp_Store.ConvertToObject), new ToString(Comp_Store.ConvertToString));
             }
             else
             {
-                return BadRequest();
+                return NotFound("El ID: " + id + " no cuenta con tiendas asignadas.");
             }
-            return Ok(BTree<Comp_Store>.Traversal(new Comp_Store { _id = store }, 1)) ;
+            return Ok(BTree<Comp_Store>.Traversal(new Comp_Store { _id = id }, 1)) ;
         }
         /// <summary>
         /// Obtención de tiendas totales
         /// </summary>
-        /// <response code="200">Muestra de todos los productos dentro del sistema</response>
+        /// <response code="200">Muestra de todas las tiendas en el sistema</response>
+        /// <response code="200">No se encuentran valores disponibles</response>
         [HttpGet, Route("Display")]
         public ActionResult<List<Comp_Store>> getShops()
         {
             BTree<Comp_Store>.Create("TreeStore", new ToObject(Comp_Store.ConvertToObject), new ToString(Comp_Store.ConvertToString));
-            return Ok(BTree<Comp_Store>.Traversal(null)) ;
+            var total = BTree<Comp_Store>.Traversal(null);
+            if (total.Count == 0)
+            {
+                return NotFound("No se encuentran valores disponibles.");
+            }
+            return Ok(total);
         }
         /// <summary>
-        /// Ingresar productos
+        /// Ingresar tiendas
         /// </summary>
-        /// <response code="200">Productos ingresados correctamente</response>
+        /// <response code="200">Tienda ingresada correctamente</response>
         /// <response code="404">Datos no compatibles</response>
         [HttpPost]
         public ActionResult<IEnumerable<string>> postStore([FromForm]Comp_Store store)
@@ -56,9 +62,9 @@ namespace EDII_PROYECTO.Controllers
             }
             else
             {
-                return BadRequest("Solicitud erronea");
+                return BadRequest("Solicitud erronea.");
             }
-            return Ok();
+            return Ok("Datos ingresados correctamente.");
         }
         /// <summary>
         /// Modificación de datos
@@ -69,11 +75,11 @@ namespace EDII_PROYECTO.Controllers
             BTree<Comp_Store>.Create(treeFile, new ToObject(Comp_Store.ConvertToObject), new ToString(Comp_Store.ConvertToString));
             if (BTree<Comp_Store>.Traversal(new Comp_Store { _id = store._id }, 1).Count == 0)
             {
-                return BadRequest("El id no se encontro");
+                return BadRequest("El ID no se encontró.");
             }
 
             BTree<Comp_Store>.ValidateEdit(store, new string[2] { store._name, store._address }, new Edit(Comp_Store.Modify));
-            return Ok("El id: " + store._id + "fue actualizado");
+            return Ok("El id: " + store._id + " fue actualizado.");
         }
     }
 }

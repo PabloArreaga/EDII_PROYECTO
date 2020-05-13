@@ -21,8 +21,7 @@ namespace EDII_PROYECTO.Huffman
             huffman.CrearArbol();
             byte[] encabezado = huffman.CrearEncabezado(cantidadCaracteres);
             nombreArchivo = nombreArchivo.Replace("EXPORTADO_", string.Empty);
-            Data.Instance.adress = $"Database\\{nombreArchivo}";
-            using (FileStream ArchivoComprimir = new FileStream(Data.Instance.adress + ".huff", FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            using (FileStream ArchivoComprimir = new FileStream($"TusArchivos/{nombreArchivo}" + ".huff", FileMode.OpenOrCreate, FileAccess.ReadWrite))
             {
                 foreach (var item in encabezado)
                 {

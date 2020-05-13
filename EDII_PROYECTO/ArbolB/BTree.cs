@@ -8,6 +8,9 @@ using EDII_PROYECTO.Controllers;
 
 namespace EDII_PROYECTO.ArbolB
 {
+    delegate string ToString(object obj);
+    delegate object ToObject(string obj);
+    delegate object Edit(object obj, string[] txt);
     public class BTree<T> where T : IComparable
     {
         static List<T> auxTraversal = new List<T>();

@@ -14,22 +14,21 @@ namespace EDII_PROYECTO.Controllers
         delegate object ToObject(string obj);
         delegate object Edit(object obj, string[] txt);
         public string treeFile = "TreeProduct";
-
         /// <summary>
         /// Busqueda de producto por ID
         /// </summary>
-        [HttpGet, Route("Individual")]
-        public ActionResult<List<Comp_Product>> getProduct(int product)
+        [HttpGet]
+        public ActionResult<List<Comp_Product>> getProduct(int id)
         {
-            if (product >= 0)
+            if (id >= 0)
             {
                 BTree<Comp_Product>.Create("TreeProduct", new ToObject(Comp_Product.ConvertToObject), new ToString(Comp_Product.ConverttToString));
             }
             else
             {
-                return BadRequest(null);
+                return NotFound("El ID: " + id + " no cuenta con tiendas asignadas.");
             }
-            return Ok(BTree<Comp_Product>.Traversal(new Comp_Product { _id = product }, 1)) ;
+            return Ok(BTree<Comp_Product>.Traversal(new Comp_Product { _id = id }, 1)) ;
         }
         /// <summary>
         /// Obtiene los productos ingresados
@@ -39,14 +38,19 @@ namespace EDII_PROYECTO.Controllers
         public ActionResult<List<Comp_Product>> getProducts()
         {
             BTree<Comp_Product>.Create(treeFile, new ToObject(Comp_Product.ConvertToObject), new ToString(Comp_Product.ConverttToString));
-            return Ok(BTree<Comp_Product>.Traversal(null)) ;
+            var total = BTree<Comp_Product>.Traversal(null);
+            if (total.Count == 0)
+            {
+                return NotFound("No se encuentran valores disponibles.");
+            }
+            return Ok(total);
         }
         /// <summary>
         /// Ingresar productos
         /// </summary>
         /// <response code="200">Productos ingresados correctamente</response>
         /// <response code="404">Datos no compatibles</response>
-        [HttpPost, Route("Ingresar")]
+        [HttpPost]
         public ActionResult<IEnumerable<string>> postProduct([FromForm]Comp_Product product)
         {
             if (product._name != null && product._price >= 0)
@@ -56,9 +60,9 @@ namespace EDII_PROYECTO.Controllers
             }
             else
             {
-                return BadRequest("Solicitud erronea");
+                return BadRequest("Solicitud erronea.");
             }
-            return Ok("Dato ingresado correctamente");
+            return Ok("Dato ingresado correctamente.");
         }
         /// <summary>
         /// Ingresa varios productos mediante archivo csv
@@ -70,11 +74,11 @@ namespace EDII_PROYECTO.Controllers
         {
             if (file == null || file.Length == 0)
             {
-                return BadRequest("El archivo esta vacio o no selecciono ningun archivo");
+                return BadRequest("El archivo esta vacio o no selecciono ningun archivo.");
             }
             BTree<Comp_Product>.Create(treeFile, new ToObject(Comp_Product.ConvertToObject), new ToString(Comp_Product.ConverttToString));
             Comp_Product.LoadInventory(file.OpenReadStream());
-            return Ok("Se han ingresado los valores con exito");
+            return Ok("Se han ingresado los valores con exito.");
         }
         /// <summary>
         /// Modificación de datos
@@ -82,14 +86,18 @@ namespace EDII_PROYECTO.Controllers
         [HttpPut]
         public ActionResult<IEnumerable<string>> putProduct([FromForm]Comp_Product product)
         {
+            if (product._price < 0)
+            {
+                return BadRequest("El precio del producto debe ser mayor a 0.");
+            }
             BTree<Comp_Product>.Create(treeFile, new ToObject(Comp_Product.ConvertToObject), new ToString(Comp_Product.ConverttToString));
             if (BTree<Comp_Product>.Traversal(new Comp_Product { _id = product._id }, 1).Count == 0)
             {
-                return BadRequest("El id no se encontro");
+                return BadRequest("El id no se encontro.");
             }
 
             BTree<Comp_Product>.ValidateEdit(product, new string[2] { product._name, product._price.ToString() }, new Edit(Comp_Product.Modify));
-            return Ok("El id: " + product._id + "fue actualizado");
+            return Ok("El id: " + product._id + " fue actualizado.");
         }
     }
 }
