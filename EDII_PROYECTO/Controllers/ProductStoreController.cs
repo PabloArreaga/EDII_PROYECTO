@@ -4,6 +4,7 @@ using EDII_PROYECTO.Encrip;
 using EDII_PROYECTO.Helpers;
 using EDII_PROYECTO.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Razor.Language;
 
 namespace EDII_PROYECTO.Controllers
 {
@@ -74,7 +75,33 @@ namespace EDII_PROYECTO.Controllers
         /// <summary>
         /// Modificación de datos
         /// </summary>
-        [HttpPut, Route("Modify")]
+        /// <response code="200">Muestra de todos los productos dentro del sistema</response>
+        [Route("All")]
+        [HttpGet]
+        public List<Comp_Store_Product> getStoreProducts()
+        {
+            BTree<Comp_Store_Product>.Create(treeFile, new ToObject(Comp_Store_Product.ConvertToObject), new ToString(Comp_Store_Product.ConvertToString));
+            return BTree<Comp_Store_Product>.Traversal(null);
+        }
+
+
+        [Route("OneStore")]
+        [HttpGet]
+        public List<Comp_Store_Product> getStoreProductsoneStore([FromForm] int store)
+        {
+            BTree<Comp_Store_Product>.Create(treeFile, new ToObject(Comp_Store_Product.ConvertToObject), new ToString(Comp_Store_Product.ConvertToString));
+            var OneStore = new List<Comp_Store_Product>();
+            foreach (var item in BTree<Comp_Store_Product>.Traversal(null))
+            {
+                if (item._idStore == store)
+                {
+                    OneStore.Add(item);
+                }
+            }
+            return OneStore;
+        }
+
+        [HttpPut] // modifica los datos
         public ActionResult<IEnumerable<string>> putStoreProduct([FromForm]Comp_Store_Product storeProduct)
         {
             BTree<Comp_Store_Product>.Create(treeFile, new ToObject(Comp_Store_Product.ConvertToObject), new ToString(Comp_Store_Product.ConvertToString));
