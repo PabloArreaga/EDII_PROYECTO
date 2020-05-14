@@ -3,6 +3,7 @@ using EDII_PROYECTO.ArbolB;
 using EDII_PROYECTO.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using EDII_PROYECTO.Encrip;
 
 namespace EDII_PROYECTO.Controllers
 {

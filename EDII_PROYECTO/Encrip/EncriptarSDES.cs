@@ -17,7 +17,10 @@ namespace EDII_PROYECTO.Encrip
         public List<int> IP = new List<int>(new List<int> { 6, 3, 5, 7, 2, 0, 1, 4 });
         public List<int> Swap = new List<int>(new List<int> { 4, 5, 6, 7, 0, 1, 2, 3 });
         public List<int> IpInversa = new List<int>(new List<int> { 5, 6, 4, 1, 7, 2, 0, 3 });
-
+		public byte[] obtenerArreglo(string textOriginal)
+		{
+			return System.Text.Encoding.Unicode.GetBytes(textOriginal);
+		}
         public void ConvertirBinario(int LlaveBinaria)
         {
             //Convierte el numero a binario
