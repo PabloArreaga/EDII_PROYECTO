@@ -3,218 +3,137 @@ using EDII_PROYECTO.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 
 namespace EDII_PROYECTO.Encrip
 {
-    public class EncriptarSDES
-    {
+	public class EncriptarSDES
+	{
+        private static string key1 = string.Empty;
+        private static string key2 = string.Empty;
 
-        public List<int> LlaveUsuario = new List<int>();// llenar con clave que manda el usuario
-        public List<int> P10 = new List<int>(new List<int> { 8, 5, 3, 7, 9, 2, 6, 0, 1, 4 });
-        public List<int> P8 = new List<int>(new List<int> { 7, 9, 3, 5, 8, 2, 1, 6 });
-        public List<int> P4 = new List<int>(new List<int> { 0, 3, 2, 1 });
-        public List<int> EP = new List<int>(new List<int> { 0, 1, 3, 2, 3, 2, 1, 0 });
-        public List<int> IP = new List<int>(new List<int> { 6, 3, 5, 7, 2, 0, 1, 4 });
-        public List<int> Swap = new List<int>(new List<int> { 4, 5, 6, 7, 0, 1, 2, 3 });
-        public List<int> IpInversa = new List<int>(new List<int> { 5, 6, 4, 1, 7, 2, 0, 3 });
-		public byte[] obtenerArreglo(string textOriginal)
-		{
-			return System.Text.Encoding.Unicode.GetBytes(textOriginal);
-		}
-        public void ConvertirBinario(int LlaveBinaria)
+        public static void StartKey()
         {
-            //Convierte el numero a binario
-            string binarioLlaveDiez = Convert.ToString(LlaveBinaria, 2);
-            if (binarioLlaveDiez.Length < 10)
+            if (!Directory.Exists("Datos"))
             {
-                binarioLlaveDiez = binarioLlaveDiez.PadLeft(10, '0');
+                Directory.CreateDirectory("Datos");
             }
-            var listaGenerado = new List<int>();
-            Data.Instance.DatosGenerados.Add(new tipo
+            if (!File.Exists("Datos//llave.txt"))
             {
-                valorGen = listaGenerado
-            });
-            int cont = 0;
-            foreach (var item in binarioLlaveDiez)
-            {
-                Data.Instance.DatosGenerados.ElementAt(0).valorGen.Add(int.Parse(Convert.ToString(item)));
-                cont++;
+                var nuevo = new Random().Next(0, 1023);
+                Data.Instance.value = 15;
+                var text = Cifrado(nuevo.ToString(), true);
+                Data.Instance.value = nuevo;
+                File.WriteAllText("Datos//llave.txt", text);
             }
-            GenerarLlaves();
+            else
+            {
+                Data.Instance.value = 15;
+                Data.Instance.value = Convert.ToInt32(Cifrado(File.ReadAllText("Datos//llave.txt"), false));
+            }
         }
-        private void GenerarLlaves()
-        {
-            Data.Instance.ClavesParaLlave.Add( new tipo { valorGen = LlaveUsuario} );
-            Data.Instance.ClavesParaLlave.Add(new tipo { valorGen = P10 });
-            Data.Instance.ClavesParaLlave.Add(new tipo { valorGen = P8 });
-            Data.Instance.ClavesParaLlave.Add(new tipo { valorGen = P4 });
-            Data.Instance.ClavesParaLlave.Add(new tipo { valorGen = EP });
-            Data.Instance.ClavesParaLlave.Add(new tipo { valorGen = IP });
-            Data.Instance.ClavesParaLlave.Add(new tipo { valorGen = Swap });
-            Data.Instance.ClavesParaLlave.Add(new tipo { valorGen = IpInversa });
 
-            int cont = 0;
-            while (cont < 5)
+        static string Permute(string key, int type)
+        {
+            switch (type)
             {
-                var ListaSerie = new List<int>();
-                Data.Instance.DatosGenerados.Add(new tipo
+                case 1:
+                    return $"{ key[9] }{ key[5] }{ key[4] }{ key[6] }{ key[1] }{ key[7] }{ key[0] }{ key[8] }{ key[3] }{ key[2] }";
+                case 2:
+                    return $"{ key[2] }{ key[5] }{ key[9] }{ key[7] }{ key[3] }{ key[1] }{ key[0] }{ key[8] }";
+                case 3:
+                    return $"{ key[3] }{ key[0] }{ key[2] }{ key[1] }";
+            }
+            return string.Empty;
+        }
+
+        static string IP(string key, bool inverse)
+        {
+            if (!inverse)
+            {
+                return $"{ key[5] }{ key[2] }{ key[0] }{ key[3] }{ key[7] }{ key[6] }{ key[1] }{ key[4] }";
+            }
+
+            return $"{ key[2] }{ key[6] }{ key[1] }{ key[3] }{ key[7] }{ key[0] }{ key[5] }{ key[4] }";
+        }
+
+        static string LS(string key, int type)
+        {
+            if (type == 1)
+            {
+                return $"{ key[1] }{ key[2] }{ key[3] }{ key[4] }{ key[0] }";
+            }
+
+            return $"{ key[2] }{ key[3] }{ key[4] }{ key[0] }{ key[1] }";
+        }
+
+        static string XOR(string key1, string key2)
+        {
+            var aux = string.Empty;
+
+            for (int i = 0; i < key1.Length; i++)
+            {
+                aux += key1[i] == key2[i] ? '0' : '1';
+            }
+
+            return aux;
+        }
+
+        static string SW(string key)
+        {
+            return $"{key.Substring(4)}{key.Substring(0, 4)}";
+        }
+
+        static string EP(string key)
+        {
+            return $"{ key[0] }{ key[3] }{ key[2] }{ key[1] }{ key[2] }{ key[1] }{ key[0] }{ key[3] }";
+        }
+
+        static string S01(string key)
+        {
+            var S0 = new string[4, 4] { { "00", "01", "11", "10" }, { "11", "00", "01", "00" }, { "10", "01", "00", "11" }, { "01", "10", "00", "00" } };
+            var S1 = new string[4, 4] { { "00", "10", "11", "00" }, { "11", "00", "01", "01" }, { "10", "10", "00", "10" }, { "10", "00", "11", "00" } };
+
+            return $"{S0[Convert.ToInt32($"{key[0]}{key[3]}", 2), Convert.ToInt32($"{key[1]}{key[2]}", 2)]}{S1[Convert.ToInt32($"{key[4]}{key[7]}", 2), Convert.ToInt32($"{key[5]}{key[6]}", 2)]}";
+        }
+
+        static void CreateKey(string key, bool cipher)
+        {
+            var ResultLS = Permute(key, 1);
+            var LS1 = $"{LS(ResultLS.Substring(0, 5), 1)}{LS(ResultLS.Substring(5), 1)}";
+            key1 = cipher ? Permute(LS1, 2) : Permute($"{LS(LS1.Substring(0, 5), 2)}{LS(LS1.Substring(5), 2)}", 2);
+            key2 = cipher ? Permute($"{LS(LS1.Substring(0, 5), 2)}{LS(LS1.Substring(5), 2)}", 2) : Permute(LS1, 2);
+        }
+
+        static string fK(string key, string k)
+        {
+            var ResultXOR1 = XOR(k, EP(key.Substring(4)));
+            var ResultXOR2 = XOR(key.Substring(0, 4), Permute(S01(ResultXOR1), 3));
+
+            return $"{ResultXOR2}{key.Substring(4)}";
+        }
+
+        public static string Cifrado(string info, bool cipher)
+        {
+            var aux = string.Empty;
+            if (Data.Instance.value < 1024)
+            {
+                CreateKey(Convert.ToString(Data.Instance.value, 2).PadLeft(10, '0'), cipher);
+
+                foreach (var character in info)
                 {
-                    valorGen = ListaSerie
-                });
-                cont++;
+                    var binCharacter = Convert.ToString((int)character, 2).PadLeft(8, '0');
+
+                    var ResultIP = IP(binCharacter, true);
+
+                    var ResultSW = SW(fK(ResultIP, key1));
+
+                    var ResultIP2 = IP(fK(ResultSW, key2), false);
+
+                    aux += Convert.ToChar(Convert.ToInt32(ResultIP2, 2));
+                }
             }
-            //La clave del usuario es (0)
-            //Generacion de P10 (1)
-            foreach (var item in Data.Instance.ClavesParaLlave.ElementAt(0).valorGen)
-            {
-                Data.Instance.DatosGenerados.ElementAt(1).valorGen.Add(Data.Instance.DatosGenerados.ElementAt(0).valorGen.ElementAt(int.Parse(Convert.ToString(item))));
-            }
-            //LS1 (2)
-            for (int i = 0; i < 4; i++)
-            {
-                Data.Instance.DatosGenerados.ElementAt(2).valorGen.Add(Data.Instance.DatosGenerados.ElementAt(1).valorGen.ElementAt(i + 1));
-            }
-            Data.Instance.DatosGenerados.ElementAt(2).valorGen.Add(Data.Instance.DatosGenerados.ElementAt(1).valorGen.ElementAt(0));
-            for (int i = 5; i < 9; i++)
-            {
-                Data.Instance.DatosGenerados.ElementAt(2).valorGen.Add(Data.Instance.DatosGenerados.ElementAt(1).valorGen.ElementAt(i + 1));
-            }
-            Data.Instance.DatosGenerados.ElementAt(2).valorGen.Add(Data.Instance.DatosGenerados.ElementAt(1).valorGen.ElementAt(5));
-            //Generacion de P8-LS1 (3) = k1
-            foreach (var item in Data.Instance.ClavesParaLlave.ElementAt(1).valorGen)
-            {
-                Data.Instance.DatosGenerados.ElementAt(3).valorGen.Add(Data.Instance.DatosGenerados.ElementAt(2).valorGen.ElementAt(int.Parse(Convert.ToString(item))));
-            }
-            //LS2 (4)
-            for (int i = 0; i < 3; i++)
-            {
-                Data.Instance.DatosGenerados.ElementAt(4).valorGen.Add(Data.Instance.DatosGenerados.ElementAt(2).valorGen.ElementAt(i + 2));
-            }
-            Data.Instance.DatosGenerados.ElementAt(4).valorGen.Add(Data.Instance.DatosGenerados.ElementAt(2).valorGen.ElementAt(0));
-            Data.Instance.DatosGenerados.ElementAt(4).valorGen.Add(Data.Instance.DatosGenerados.ElementAt(2).valorGen.ElementAt(1));
-            for (int i = 5; i < 8; i++)
-            {
-                Data.Instance.DatosGenerados.ElementAt(4).valorGen.Add(Data.Instance.DatosGenerados.ElementAt(2).valorGen.ElementAt(i + 2));
-            }
-            Data.Instance.DatosGenerados.ElementAt(4).valorGen.Add(Data.Instance.DatosGenerados.ElementAt(2).valorGen.ElementAt(5));
-            Data.Instance.DatosGenerados.ElementAt(4).valorGen.Add(Data.Instance.DatosGenerados.ElementAt(2).valorGen.ElementAt(6));
-            //Generacion de P8-LS2 (5) = k2
-            foreach (var item in Data.Instance.ClavesParaLlave.ElementAt(1).valorGen)
-            {
-                Data.Instance.DatosGenerados.ElementAt(5).valorGen.Add(Data.Instance.DatosGenerados.ElementAt(4).valorGen.ElementAt(int.Parse(Convert.ToString(item))));
-            }
+            return aux;
         }
-		public byte CifrarODescifrar(int primera, int segundo, string caracter, int paso)
-		{
-			int llave = 0;
-			// cuando es la primera vez el byte pasa al IP
-			if (paso == 1)
-			{
-				llave = primera;
-				char[] original = caracter.ToCharArray();
-				caracter = "";
-				foreach (var item in Data.Instance.ClavesParaLlave.ElementAt(4).valorGen)
-				{
-					caracter = caracter + Convert.ToString(original[item]);
-				}
-			}
-			else
-			{
-				llave = segundo;
-			}
-			// El dato recibido se pasa a un arreglo
-			string[] ip = new string[8];
-			int conteo = 0;
-			foreach (var item in caracter)
-			{
-				ip[conteo] = Convert.ToString(item);
-				conteo++;
-			}
-			// EP_B2(Expandir y permutar bloque 2 de ip)
-			string[] epb2 = new string[8];
-			conteo = 0;
-			foreach (var item in Data.Instance.ClavesParaLlave.ElementAt(3).valorGen)
-			{
-				epb2[conteo] = Convert.ToString(ip[item + 4]);
-				conteo++;
-			}
-			// EP_B2 XOR K (k se determina la posicion al inicio del metodo)
-			string[] primerXOR = new string[8];
-			conteo = 0;
-			foreach (var item in Data.Instance.DatosGenerados.ElementAt(llave).valorGen)
-			{
-				if (Convert.ToString(item) == epb2[conteo])
-				{
-					primerXOR[conteo] = Convert.ToString(0);
-				}
-				else
-				{
-					primerXOR[conteo] = Convert.ToString(1);
-				}
-				conteo++;
-			}
-			// Se buscan las posiciones en SBox
-			string cFila0 = primerXOR[0] + primerXOR[3];
-			string cColumna0 = primerXOR[1] + primerXOR[2];
-			string cFila1 = primerXOR[4] + primerXOR[7];
-			string cColumna1 = primerXOR[5] + primerXOR[6];
-			int f0 = int.Parse(Convert.ToString(Convert.ToByte(cFila0, 2)));
-			int c0 = int.Parse(Convert.ToString(Convert.ToByte(cColumna0, 2)));
-			int f1 = int.Parse(Convert.ToString(Convert.ToByte(cFila1, 2)));
-			int c1 = int.Parse(Convert.ToString(Convert.ToByte(cColumna1, 2)));
-			string valorMatriz = Data.Instance.SBox0[f0, c0] + Data.Instance.SBox1[f1, c1];
-			// Se realiza P4
-			conteo = 0;
-			char[] s0s1 = valorMatriz.ToCharArray();
-			string[] p4 = new string[4];
-			foreach (var item in Data.Instance.ClavesParaLlave.ElementAt(2).valorGen)
-			{
-				p4[conteo] = Convert.ToString(s0s1[item]);
-				conteo++;
-			}
-			// P4 XOR B1 (bloque 1 de ip)
-			conteo = 0;
-			string[] segundoXOR = new string[4];
-			string[] unionXORb2 = new string[8]; // vamos a aprovechar el ciclo para agrgar datos al arreglo; se desarrolla la union entre el 2 bloque del ip con el resultados del XOR
-			foreach (var item in p4)
-			{
-				if (item == ip[conteo])
-				{
-					segundoXOR[conteo] = "0";
-					unionXORb2[conteo] = "0";
-				}
-				else
-				{
-					segundoXOR[conteo] = "1";
-					unionXORb2[conteo] = "1";
-				}
-				conteo++;
-			}
-			// Se termina de llenar la union
-			for (int i = 4; i < 8; i++)
-			{
-				unionXORb2[i] = ip[i];
-			}
-			// Se realiza SWAP si es la primera vez
-			if (paso == 1)
-			{
-				string swap = "";
-				foreach (var item in Data.Instance.ClavesParaLlave.ElementAt(5).valorGen)
-				{
-					swap = swap + unionXORb2[item];
-				}
-				return CifrarODescifrar(primera, segundo, swap, 2);
-			}
-			else
-			{
-				string ipinverso = "";
-				foreach (var item in Data.Instance.ClavesParaLlave.ElementAt(6).valorGen)
-				{
-					ipinverso = ipinverso + unionXORb2[item];
-				}
-				byte byteCifrado = Convert.ToByte(ipinverso, 2);
-				return byteCifrado;
-			}
-		}
-	}
+    }
 }

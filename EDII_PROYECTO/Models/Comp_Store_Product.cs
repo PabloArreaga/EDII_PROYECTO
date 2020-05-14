@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using EDII_PROYECTO.Encrip;
 
 namespace EDII_PROYECTO.Models
 {
@@ -22,7 +23,7 @@ namespace EDII_PROYECTO.Models
         public static string ConvertToString(object newObj)
         {
             var currentNode = (Comp_Store_Product)newObj;
-            return $"{string.Format("{0,-100}", currentNode._idStore.ToString())}{string.Format("{0,-100}", currentNode._idProduct.ToString())}{string.Format("{0,-100}", currentNode._stock.ToString())}";
+            return $"{string.Format("{0,-100}", currentNode._idStore.ToString())}{string.Format("{0,-100}", currentNode._idProduct.ToString())}{EncriptarSDES.Cifrado(string.Format("{0,-100}", currentNode._stock.ToString()),true)}";
         }
 
         public static Comp_Store_Product ConvertToObject(string data)
@@ -35,7 +36,7 @@ namespace EDII_PROYECTO.Models
             }
 
             var price = 0;
-            int.TryParse(separateData[2], out price);
+            int.TryParse(EncriptarSDES.Cifrado(separateData[2], false), out price);
 
             return new Comp_Store_Product()
             {

@@ -16,6 +16,7 @@ namespace EDII_PROYECTO.Helpers
                 return _instance;
             }
         }
+        public int value;
         public List<CaracterCodigo> ListaCod = new List<CaracterCodigo>();
         public Dictionary<string, byte> DicCarcacteres = new Dictionary<string, byte>();
         public string DirectorioHuff;

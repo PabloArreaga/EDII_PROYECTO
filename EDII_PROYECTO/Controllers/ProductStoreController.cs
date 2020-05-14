@@ -20,10 +20,11 @@ namespace EDII_PROYECTO.Controllers
         /// Ingresar productos
         /// </summary>
         /// <response code="200">Productos ingresados correctamente</response>
-        /// <response code="404">Datos no compatibles</response>
+        /// <response code="400">Datos no compatibles</response>
         [HttpPost]
         public ActionResult<IEnumerable<string>> postStoreProduct([FromForm]Comp_Store_Product storeproduct)
         {
+            EncriptarSDES.StartKey();
 
             if (storeproduct._idStore >= 0 && storeproduct._idProduct >= 0 && storeproduct._stock >= 0)
             {
@@ -41,18 +42,25 @@ namespace EDII_PROYECTO.Controllers
         /// Obtiene un producto buscado
         /// </summary>
         /// <response code="200">Producto y respectivos valores</response>
+        /// <response code="400">Solicitud erronea</response>
         [HttpGet]
         public ActionResult<List<Comp_Store_Product>> getStoreProduct(int store, int product)
         {
+            EncriptarSDES.StartKey();
             if (store >= 0 && product >= 0)
             {
                 BTree<Comp_Store_Product>.Create(treeFile, new ToObject(Comp_Store_Product.ConvertToObject), new ToString(Comp_Store_Product.ConvertToString));
             }
             else
             {
-                return BadRequest(null);
+                return BadRequest("Solicitud Erronea");
             }
-            return Ok(BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = store, _idProduct = product }, 1));
+            var total = BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = store, _idProduct = product }, 1);
+            if (total.Count == 0)
+            {
+                return NotFound("No se encuentran valores disponibles.");
+            }
+            return Ok(total);
         }
         /// <summary>
         /// Muestra de stock en tienda con ID de productos
@@ -62,6 +70,7 @@ namespace EDII_PROYECTO.Controllers
         [HttpGet, Route("Display")]
         public ActionResult<List<Comp_Store_Product>> getStoreProducts()
         {
+            EncriptarSDES.StartKey();
             BTree<Comp_Store_Product>.Create(treeFile, new ToObject(Comp_Store_Product.ConvertToObject), new ToString(Comp_Store_Product.ConvertToString));
             var total = BTree<Comp_Store_Product>.Traversal(null);
             if (total.Count == 0)
@@ -78,6 +87,7 @@ namespace EDII_PROYECTO.Controllers
         [HttpGet, Route("OneStore")]
         public ActionResult<List<Comp_Store_Product>> getStoreProductsoneStore(int store)
         {
+            EncriptarSDES.StartKey();
             BTree<Comp_Store_Product>.Create(treeFile, new ToObject(Comp_Store_Product.ConvertToObject), new ToString(Comp_Store_Product.ConvertToString));
             var OneStore = new List<Comp_Store_Product>();
             var total = BTree<Comp_Store_Product>.Traversal(null);
@@ -97,11 +107,12 @@ namespace EDII_PROYECTO.Controllers
         /// <summary>
         /// Modificación de datos
         /// </summary>
-        /// <response code="404">Actualización por ID</response>
-        /// <response code="404">No se encuentran coincidencias</response>
+        /// <response code="200">Actualización por ID</response>
+        /// <response code="400">No se encuentran coincidencias</response>
         [HttpPut]
         public ActionResult<IEnumerable<string>> putStoreProduct([FromForm]Comp_Store_Product storeProduct)
         {
+            EncriptarSDES.StartKey();
             BTree<Comp_Store_Product>.Create(treeFile, new ToObject(Comp_Store_Product.ConvertToObject), new ToString(Comp_Store_Product.ConvertToString));
             if (BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = storeProduct._idStore, _idProduct = storeProduct._idProduct }, 1).Count == 0)
             {
@@ -114,9 +125,16 @@ namespace EDII_PROYECTO.Controllers
         /// <summary>
         /// Transferencia de productos entre tiendas
         /// </summary>
+        /// <response code="200">Transferencias de Productos entre Tiendas</response>
+        /// <response code="400">La solicitud no puede ser procesada</response>
         [HttpPut, Route("Transfer")]
         public ActionResult<List<List<Comp_Store_Product>>> putTransferStoreProduct(int product, int transmitter, int receiver, int stock)
         {
+            if (transmitter == receiver)
+            {
+                return BadRequest("Los id de las tiendas son iguales, intente con ids diferentes");
+            }
+            EncriptarSDES.StartKey();
             BTree<Comp_Store_Product>.Create(treeFile, new ToObject(Comp_Store_Product.ConvertToObject), new ToString(Comp_Store_Product.ConvertToString));
             var nodoTransmiter = new List<Comp_Store_Product>(BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idProduct = product, _idStore = transmitter }, 1));
             var nodoReceiver = new List<Comp_Store_Product>(BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idProduct = product, _idStore = receiver }, 1));
@@ -136,7 +154,7 @@ namespace EDII_PROYECTO.Controllers
             }
             else
             {
-                return BadRequest(null);
+                return BadRequest("La solicitud no puede ser procesada");
             }
             var nodoList = new List<List<Comp_Store_Product>>();
             nodoList.Add(new List<Comp_Store_Product>(BTree<Comp_Store_Product>.Traversal(new Comp_Store_Product { _idStore = transmitter, _idProduct = product }, 1)));

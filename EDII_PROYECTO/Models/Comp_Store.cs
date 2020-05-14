@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using EDII_PROYECTO.Encrip;
 
 namespace EDII_PROYECTO.Models
 {
@@ -22,7 +23,7 @@ namespace EDII_PROYECTO.Models
             var currentNode = (Comp_Store)newObj;
             currentNode._name = currentNode._name == null ? string.Empty : currentNode._name;
             currentNode._address = currentNode._address == null ? string.Empty : currentNode._address;
-            return $"{string.Format("{0,-100}", currentNode._id.ToString())}{string.Format("{0,-100}", currentNode._name)}{string.Format("{0,-100}", currentNode._address)}";
+            return $"{string.Format("{0,-100}", currentNode._id.ToString())}{EncriptarSDES.Cifrado(string.Format("{0,-100}",  currentNode._name), true)}{ EncriptarSDES.Cifrado(string.Format("{0,-100}",currentNode._address),true)}";
         }
 
         public static Comp_Store ConvertToObject(string data)
@@ -33,12 +34,12 @@ namespace EDII_PROYECTO.Models
                 dataSeparate.Add(data.Substring(0, 100));
                 data = data.Substring(100);
             }
-
+           
             return new Comp_Store()
             {
                 _id = Convert.ToInt32(dataSeparate[0].Trim()),
-                _name = dataSeparate[1].Trim(),
-                _address = dataSeparate[2].Trim()
+                _name = EncriptarSDES.Cifrado(dataSeparate[1], false).Trim(),
+                _address = EncriptarSDES.Cifrado(dataSeparate[2], false).Trim()
             };
         }
 

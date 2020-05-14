@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using EDII_PROYECTO.ArbolB;
+using EDII_PROYECTO.Encrip;
 
 namespace EDII_PROYECTO.Models
 {
@@ -23,7 +24,7 @@ namespace EDII_PROYECTO.Models
         {
             var currentNode = (Comp_Product)newObj;
             currentNode._name = currentNode._name == null ? string.Empty : currentNode._name;
-            return $"{string.Format("{0,-100}", currentNode._id.ToString())}{string.Format("{0,-100}", currentNode._name)}{string.Format("{0,-100}", currentNode._price.ToString())}";
+            return $"{string.Format("{0,-100}", currentNode._id.ToString())}{EncriptarSDES.Cifrado(string.Format("{0,-100}", currentNode._name), true)}{EncriptarSDES.Cifrado(string.Format("{0,-100}", currentNode._price.ToString()), true)}";
         }
 
         public static Comp_Product ConvertToObject(string data)
@@ -36,12 +37,12 @@ namespace EDII_PROYECTO.Models
             }
 
             var price = 0.00;
-            double.TryParse(dataSeparate[2].Trim(), out price);
+            double.TryParse(EncriptarSDES.Cifrado(dataSeparate[2], false).Trim(), out price);
 
             return new Comp_Product()
             {
                 _id = Convert.ToInt32(dataSeparate[0].Trim()),
-                _name = dataSeparate[1].Trim(),
+                _name = EncriptarSDES.Cifrado(dataSeparate[1],false).Trim(),
                 _price = price
             };
         }
